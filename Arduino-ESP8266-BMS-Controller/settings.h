@@ -12,6 +12,11 @@
 #define EEPROM_CHECKSUM_ADDRESS 256
 #define EEPROM_CONFIG_ADDRESS EEPROM_CHECKSUM_ADDRESS+sizeof(uint32_t)
 
+// Timeout in secs of hotspot mode after which ESP8266 will reboot
+#define AP_TIMEOUT 600
+// WiFi connect timeout in secs after which ESP8266 will enter hotspot mode
+#define WIFI_TIMEOUT 120
+
 struct wifi_eeprom_settings {
   char wifi_ssid[32 + 1];
   char wifi_passphrase[63 + 1];

@@ -8,6 +8,7 @@
 #include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>
 
+
 ESP8266WebServer server(80);
 
 const char* ssid = "DIY_BMS_CONTROLLER";
@@ -306,6 +307,29 @@ void handleSave() {
   }
 }
 
+//Enter initial hotspot mode
+void startAccessPoint(void) {
+  delay(100);
+  int n = WiFi.scanNetworks();
+  if (n == 0)
+    networks = "no networks found";
+  else
+  {
+    for (int i = 0; i < n; ++i)
+    {
+      if (WiFi.encryptionType(i) != ENC_TYPE_NONE) {
+        // Only show encrypted networks
+        networks += "<option>";
+        networks += WiFi.SSID(i);
+        networks += "</option>";
+      }
+      delay(10);
+    }
+  }
+
+  handleRoot();
+}
+
 void setupAccessPoint(void) {
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
@@ -347,10 +371,13 @@ void setupAccessPoint(void) {
   server.begin();
   MDNS.addService("http", "tcp", 80);
 
-  Serial.println("Soft AP ready");
-  while (1) {
+  Serial.println("Soft AP ready on 192.168.4.1");
+  // Restart after 10 minutes in case a power cut brought us here
+  long m = millis();  
+  while (millis()< m+(AP_TIMEOUT * 1000)) {
     HandleWifiClient();
   }
+  ESP.restart();
 }
 
 void SetupManagementRedirect() {
@@ -360,6 +387,9 @@ void SetupManagementRedirect() {
   server.on("/aboveavgbalance", HTTP_GET, handleAboveAverageBalance);
   server.on("/getmoduleconfig", HTTP_GET, handleCellConfigurationJSON);
   server.on("/getsettings", HTTP_GET, handleSettingsJSON);
+  server.on("/hotspot", HTTP_GET, startAccessPoint);  // Enter hotspot mode
+  server.on("/save", HTTP_POST, handleSave);
+ 
 
   server.on("/factoryreset", HTTP_POST, handleFactoryReset);
   server.on("/setloadresistance", HTTP_POST, handleSetLoadResistance);

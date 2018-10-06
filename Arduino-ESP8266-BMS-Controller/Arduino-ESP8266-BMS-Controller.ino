@@ -234,12 +234,15 @@ void setup() {
   //Check WIFI is working and connected
   Serial.print(F("WIFI Connecting"));
 
-  //TODO: We need a timeout here in case the AP is dead!
-  while (WiFi.status() != WL_CONNECTED)
+  //Attempt to connect to WIFI for timeout period and then start hotspot if unsuccessful
+  for ( int i=0; i<=WIFI_TIMEOUT*4; i++ )
   {
     delay(250);
-    Serial.print( WiFi.status() );
+    Serial.println( WiFi.status() );
+    if (WiFi.status() == WL_CONNECTED) break;
   }
+  // If WiFi cannot connect, enter AP mode
+  if (WiFi.status() != WL_CONNECTED) setupAccessPoint();
   Serial.print(F(". Connected IP:"));
   Serial.println(WiFi.localIP());
 
