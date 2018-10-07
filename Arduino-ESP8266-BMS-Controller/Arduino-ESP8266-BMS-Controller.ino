@@ -38,6 +38,8 @@ extern "C"
 #include "settings.h"
 #include "SoftAP.h"
 #include "WebServiceSubmit.h"
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
 
 //Allow up to 24 modules
 cell_module cell_array[24];
@@ -49,6 +51,11 @@ bool runProvisioning;
 EmonCMS emoncms;
 
 os_timer_t myTimer;
+
+// Set up  MQTT
+const char* mqttServerName = MQTTSERVER;
+WiFiClient espClient;
+PubSubClient mqttclient(espClient);
 
 void print_module_details(struct  cell_module *module) {
   Serial.print("Mod: ");
@@ -189,6 +196,59 @@ void scani2cBus() {
   }
 }
 
+// MQTT functions
+void mqttcallback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+  StaticJsonBuffer<200> jsonBuffer;     //Decode JSON
+  JsonObject& root = jsonBuffer.parseObject(payload);
+  // Test if parsing succeeds.
+  if (!root.success()) {
+    Serial.println("parseObject() failed");
+    return;
+  }
+// TODO - Do stuff
+}
+
+void updatemqtt(eeprom_settings myConfig, cell_module (&cell_array)[24], int cell_array_max) {
+  for (int a = 0; a < cell_array_max; a++) {
+    DynamicJsonBuffer jsonBuffer(400);                              //Allocate buffer for JSON
+    JsonObject& root = jsonBuffer.createObject();  
+    root["address"] = String(cell_array[a].address);
+    root["voltage"] = String(cell_array[a].valid_values ? cell_array[a].voltage : 0);
+    root["temperature"] = String(cell_array[a].valid_values ? cell_array[a].temperature : 0);  
+    char jsonout[256];
+    root.printTo(jsonout);
+    mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
+  }
+  return;
+}
+
+void mqttreconnect() {
+  // Loop until we're reconnected
+  while (!mqttclient.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Create a random client ID
+    String clientId = "diyBMS-";
+    clientId += String(random(0xffff), HEX);
+    // Attempt to connect
+    if (mqttclient.connect(clientId.c_str())) {
+      Serial.println("connected");
+      mqttclient.subscribe(MQTT_COMMAND_TOPIC);
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(mqttclient.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
 
 void setup() {
   Serial.begin(19200);           // start serial for output
@@ -245,23 +305,24 @@ void setup() {
   if (WiFi.status() != WL_CONNECTED) setupAccessPoint();
   Serial.print(F(". Connected IP:"));
   Serial.println(WiFi.localIP());
+  //Setup MQTT
+  mqttclient.setServer(mqttServerName, 1883);
+  mqttclient.setCallback(mqttcallback);
 
   SetupManagementRedirect();
 }
 
 void loop() {
-  HandleWifiClient();
-  yield();
-  delay(250);
-  HandleWifiClient();
-  yield();
-  delay(250);
-  HandleWifiClient();
-  yield();
-  delay(250);
-  HandleWifiClient();
-  yield();
-  delay(250);
+  // Ensure we are connected to MQTT
+  if (!mqttclient.connected()) {
+    mqttreconnect();
+  }
+  for ( int j=0; j<=3; j++) {
+    HandleWifiClient();
+    mqttclient.loop();
+    yield();
+    delay(250);
+  }
 
 
   if (cell_array_max > 0) {
@@ -278,8 +339,10 @@ void loop() {
         Serial.println();
     */
     if ((millis() > next_submit) && (WiFi.status() == WL_CONNECTED)) {
-      emoncms.postData(myConfig, cell_array, cell_array_max);
       //Update emoncms every 30 seconds
+      emoncms.postData(myConfig, cell_array, cell_array_max);
+      //Update MQTT every 30 seconds
+      updatemqtt(myConfig, cell_array, cell_array_max);
       next_submit = millis() + 30000;
     }
   }
