@@ -218,7 +218,7 @@ function refreshGraph(){
   }
   
 /* Dynamically load the CSS and JS files from the web */
-var css = ["\/main.css", 
+var css = ["https://stuartpittaway.github.io/diyBMS/main.css", 
 	"https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.5/jquery.mobile.min.css",
 	"https://fonts.googleapis.com/css?family=Open+Sans:300,400,700",
 	"https://cdnjs.cloudflare.com/ajax/libs/jqPlot/1.0.9/jquery.jqplot.min.css"];
