@@ -23,6 +23,9 @@
 // MQTT topic to  listen for commands from
 #define MQTT_COMMAND_TOPIC "diybms_command"
 
+//URL of location to download  browser files
+#define FILES_URL "https://delboy711.github.io/diyBMS/"
+
 
 struct wifi_eeprom_settings {
   char wifi_ssid[32 + 1];
