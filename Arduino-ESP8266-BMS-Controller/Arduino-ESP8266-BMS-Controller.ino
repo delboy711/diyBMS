@@ -48,6 +48,10 @@ int cell_array_max = 0;
 unsigned long next_submit;
 bool runProvisioning;
 
+extern bool manual_balance;
+bool max_enabled = false;
+  
+
 //Configuration for thermistor conversion
 //use the datasheet to get this data.
 //https://www.instructables.com/id/NTC-Temperature-Sensor-With-Arduino/
@@ -79,6 +83,37 @@ float TempC=0.0;   // variable output
 EmonCMS emoncms;
 
 os_timer_t myTimer;
+
+void avg_balance() {
+  uint16_t avgint = 0;
+  if ((myConfig.autobalance_enabled == true) && (manual_balance == false)) {
+    
+    if (cell_array_max > 0) {
+    //Work out the average
+    float avg = 0;
+    for (int a = 0; a < cell_array_max; a++) {
+      avg += 1.0 * cell_array[a].voltage;
+    }
+    avg = avg / cell_array_max;
+    avgint = avg;
+    Serial.println("Average cell voltage is currently : " + String(avg/1000));
+    Serial.println("Configured balance voltage : " + String(myConfig.balance_voltage));
+    if ( avg/1000 >= myConfig.balance_voltage )  {
+      for ( int a = 0; a < cell_array_max; a++) {
+        if (cell_array[a].voltage > avgint) {
+          cell_array[a].balance_target = avgint;
+        }
+      }
+    }  else {
+
+      for (int a = 0; a < cell_array_max; a++) {
+      command_set_bypass_voltage(cell_array[a].address,0);
+      }
+    }
+   }
+  }
+}
+
 
 // Set up  MQTT
 const char* mqttServerName = MQTTSERVER;
@@ -377,10 +412,10 @@ void loop() {
   }
 
 
-  if (cell_array_max > 0) {
+   if (cell_array_max > 0) {
 
     
-        for ( int a = 0; a < cell_array_max; a++) {
+        /*for ( int a = 0; a < cell_array_max; a++) {
           Serial.print(cell_array[a].address);
           Serial.print(':');
           Serial.print(cell_array[a].voltage);
@@ -390,11 +425,23 @@ void loop() {
           Serial.print(cell_array[a].bypass_status);
           Serial.print(' ');
         }
-        Serial.println();
+        Serial.println();*/
     
     if ((millis() > next_submit) && (WiFi.status() == WL_CONNECTED)) {
       //Update emoncms every 30 seconds
       emoncms.postData(myConfig, cell_array, cell_array_max);
+      
+      Serial.println("Configured Maximum voltage : " + String(myConfig.max_voltage));
+      
+      for (int a = 0; a < cell_array_max; a++) {
+        if (cell_array[a].voltage >= myConfig.max_voltage*1000) {
+          cell_array[a].balance_target = myConfig.max_voltage*1000; 
+           max_enabled = true;
+           Serial.println("Cell voltage : " + String(cell_array[a].voltage) + " Balance Target = " +  cell_array[a].balance_target  );
+        }
+      }
+      if (max_enabled!=true) avg_balance();
+      max_enabled = false;
       //Update MQTT every 30 seconds
       updatemqtt(myConfig, cell_array, cell_array_max);
       next_submit = millis() + 30000;

@@ -50,6 +50,12 @@ function refreshConfig() {
 		$("#emoncms_httpPort").val( data.emoncms_httpPort );
 		$("#emoncms_node_offset").val( data.emoncms_node_offset );
 		$("#emoncms_url").val( data.emoncms_url );
+		var myswitch_autobalance = $( "#autobalance_enabled" );
+		myswitch_autobalance[0].selectedIndex = data.autobalance_enabled ? 1:0;
+		myswitch_autobalance.slider( "refresh" );
+		$("#max_voltage").val( data.max_voltage );
+		$("#balance_voltage").val( data.balance_voltage );
+		$("#balance_dev").val( data.balance_dev );
 	  }
 	});
 } //end function
@@ -72,7 +78,7 @@ function refreshModules() {
 				<input type='button' data-moduleid='"+this.address+"' class='manualreadingbutton' type='button' value='Go'/> \
 				</td> \
 				<td id='module"+this.address+"temp' class='t'>&nbsp;</td> \
-				<td id='module"+this.address+"bypass' class='t'>&nbsp;</td> \
+				<td id='module"+this.address+"bypass_status' class='t'>&nbsp;</td> \
 				<td class='t'><input data-moduleid='"+this.address+"' class='tempcalib' size=8 type='number' step='0.001' min='0.001' max='99.999' value='"+this.tempc.toFixed(3)+"'/></td> \
 				<td><input data-moduleid='"+this.address+"' class='resistancec' size=8 type='number' step='0.1' min='1.0' max='200.000' value='"+this.resistance.toFixed(3)+"'/></td> \
 				<td><input type='button' data-moduleid='"+this.address+"' class='factoryreset' type='button' value='Factory Reset'/></td> \
@@ -283,6 +289,26 @@ script.onload = function(){
 	<label for="emoncms_apikey">API key:</label> \
 	<input id="emoncms_apikey" name="emoncms_apikey" size="32" type="text" /> \
 	</div> \
+	<div class="ui-field-contain"> \
+    <label for="submit-3"></label> \
+	<h4>Balancing Settings</h4> \
+	<label for="autobalance_enabled">Auto Balance enabled</label> \
+	<select data-role="slider" id="autobalance_enabled" name="autobalance_enabled"> \
+	<option value="0">Off</option> \
+	<option value="1">On</option> \
+	</select> \
+	</div> \
+	\
+	<div class="ui-field-contain"> \
+	<label for="max_voltage">Max Allowed Cell Voltage:</label> \
+	<input id="max_voltage" name="max_voltage" size="64" type="text" min="3.00" max="4.20" /> \
+	</div> \
+	\
+	<div class="ui-field-contain"> \
+	<label for="balance_voltage">Voltage to Balance above:</label> \
+	<input id="balance_voltage" name="balance_voltage" size="64" type="text" min="3.00" max="4.20" /> \
+	</div> \
+	\
 	<div class="ui-field-contain"> \
     <label for="submit-1"></label> \
     <button type="submit" id="submit-1" class="ui-shadow ui-btn ui-corner-all">Save</button> \

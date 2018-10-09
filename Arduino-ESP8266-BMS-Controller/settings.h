@@ -40,8 +40,11 @@ struct eeprom_settings {
   char emoncms_host[64 + 1];
   char emoncms_apikey[32 + 1];
   char emoncms_url[64 + 1];
-};
-
+  bool autobalance_enabled;
+  float max_voltage;
+  float balance_voltage;
+  float balance_dev;
+  };
 extern wifi_eeprom_settings myConfig_WIFI;
 extern eeprom_settings myConfig;
 
