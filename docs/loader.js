@@ -63,7 +63,7 @@ function refreshModules() {
 	  	  
 		if ( $( "#ct" ).length==0 ) {
 			//Create table if it doesn't exist already
-			$("#moduletable").empty().append("<table id='ct' data-role='table'><thead><tr><th>Module<br/>id</th><th>Current<br/>Voltage</th><th>Voltage<br/>calibration</th><th>Manual<br/>Calibration</th><th>Temperature</th><th>Temp<br/>calibration</th><th>Load<br/>resistance</th></tr></thead><tbody></tbody></table>");
+			$("#moduletable").empty().append("<table id='ct' data-role='table'><thead><tr><th>Module<br/>id</th><th>Current<br/>Voltage</th><th>Voltage<br/>calibration</th><th>Manual<br/>Calibration</th><th>Temperature</th><th>Bypass<br/>Status</th><th>Temp<br/>calibration</th><th>Load<br/>resistance</th></tr></thead><tbody></tbody></table>");
 			$.each(data, function(){ 
 				$("#ct tbody").append("<tr id='module"+this.address+"'><td >"+this.address+"</td> \
 				<td id='module"+this.address+"volt' data-moduleid='"+this.address+"' data-value='' class='voltage v'>&nbsp;</td> \
@@ -72,6 +72,7 @@ function refreshModules() {
 				<input type='button' data-moduleid='"+this.address+"' class='manualreadingbutton' type='button' value='Go'/> \
 				</td> \
 				<td id='module"+this.address+"temp' class='t'>&nbsp;</td> \
+				<td id='module"+this.address+"bypass' class='t'>&nbsp;</td> \
 				<td class='t'><input data-moduleid='"+this.address+"' class='tempcalib' size=8 type='number' step='0.001' min='0.001' max='99.999' value='"+this.tempc.toFixed(3)+"'/></td> \
 				<td><input data-moduleid='"+this.address+"' class='resistancec' size=8 type='number' step='0.1' min='1.0' max='200.000' value='"+this.resistance.toFixed(3)+"'/></td> \
 				<td><input type='button' data-moduleid='"+this.address+"' class='factoryreset' type='button' value='Factory Reset'/></td> \
@@ -123,6 +124,7 @@ function refreshModules() {
 			$("#module"+this.address+"volt").data("value",(this.volt/1000.0).toFixed(3));		
 			$("#module"+this.address+"volt").html(""+(this.volt /1000.0).toFixed(3)+"");		
 			$("#module"+this.address+"temp").html(""+this.temp+"");
+			$("#module"+this.address+"bypass").html(""+this.bypass+"");
 		});
 		
 	  }
@@ -242,7 +244,7 @@ script.onload = function(){
 	<div role="main" data-role="ui-content"><div id="nodata">There is no data available, please configure modules.</div> \
 	<div id="chart1"></div> \
 	<div id="buttons"><a href="#config" data-transition="pop" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Configure</a> <a href="#modules" data-transition="pop" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Modules</a>  \
-	<a id="AboveAvgBalance" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Above Avg Balance</a> <a id="CancelAvgBalance" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Cancel Avg Balance</a> <a id="github" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" href="https://github.com/delboy711/diyBMS">GitHub</a></div></div> \
+	<a id="AboveAvgBalance" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Above Avg Balance</a>  <a id="CancelAvgBalance" class="ui-btn ui-corner-all ui-shadow ui-btn-inline">Cancel Avg Balance</a> <a id="github" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" href="https://github.com/delboy711/diyBMS">GitHub</a></div></div> \
 	</div> \
 	<div data-role="page" id="config" data-dom-cache="true"> \
 	<div data-role="header"><h1>Configuration</h1></div> \

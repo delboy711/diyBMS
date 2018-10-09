@@ -104,6 +104,7 @@ void print_module_details(struct  cell_module *module) {
 void check_module_quick(struct  cell_module *module) {
   module->voltage = cell_read_voltage(module->address);
   module->temperature =  tempconvert(cell_read_board_temp(module->address));
+  module->bypass_status = cell_read_bypass_enabled_state(module->address);
 
   if (module->voltage >= 0 && module->voltage <= 5000) {
 
@@ -378,17 +379,19 @@ void loop() {
 
   if (cell_array_max > 0) {
 
-    /*
+    
         for ( int a = 0; a < cell_array_max; a++) {
           Serial.print(cell_array[a].address);
           Serial.print(':');
           Serial.print(cell_array[a].voltage);
           Serial.print(':');
           Serial.print(cell_array[a].temperature);
+          Serial.print(':');
+          Serial.print(cell_array[a].bypass_status);
           Serial.print(' ');
         }
         Serial.println();
-    */
+    
     if ((millis() > next_submit) && (WiFi.status() == WL_CONNECTED)) {
       //Update emoncms every 30 seconds
       emoncms.postData(myConfig, cell_array, cell_array_max);

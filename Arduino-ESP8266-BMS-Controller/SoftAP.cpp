@@ -3,6 +3,7 @@
 #include "SoftAP.h"
 #include "settings.h"
 #include "bms_values.h"
+#include "i2c_cmds.h"
 
 #include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>
@@ -71,10 +72,11 @@ void handleProvision() {
 void handleCancelAverageBalance() {
   if (cell_array_max > 0) {
     for (int a = 0; a < cell_array_max; a++) {
-      cell_array[a].balance_target = 0;
+      command_set_bypass_voltage(cell_array[a].address,0);
     }
   }
-//  server.send(200, "application/json", "[" + String(avgint) + "]\r\n\r\n");
+  Serial.println("Cancelling balancing");
+  server.send(200, "application/json", "[1]\r\n\r\n");
 }
 
 
@@ -209,12 +211,14 @@ void handleSetTempCalib() {
 
 void handleCellConfigurationJSON() {
   String json1 = "";
+  
   if (cell_array_max > 0) {
     for ( int a = 0; a < cell_array_max; a++) {
       json1 += "{\"address\":" + String(cell_array[a].address)
         +",\"volt\":" + String(cell_array[a].voltage)
         +",\"voltc\":" + String(cell_array[a].voltage_calib, 6)
         +",\"temp\":" + String(cell_array[a].temperature)
+        +",\"bypass\":" + String(cell_array[a].bypass_status)
         +",\"tempc\":" + String(cell_array[a].temperature_calib, 6)
         +",\"resistance\":" + String( isnan(cell_array[a].loadResistance) ? 0:cell_array[a].loadResistance, 6) 
         + "}";
