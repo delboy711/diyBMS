@@ -256,7 +256,7 @@ script.onload = function(){
 	<select data-role="slider" id="emoncms_enabled" name="emoncms_enabled"> \
 	<option value="0">Off</option> \
 	<option value="1">On</option> \
-	</select> 
+	</select> \
 	</div> \
 	\
 	<div class="ui-field-contain"> \
