@@ -48,6 +48,34 @@ int cell_array_max = 0;
 unsigned long next_submit;
 bool runProvisioning;
 
+//Configuration for thermistor conversion
+//use the datasheet to get this data.
+//https://www.instructables.com/id/NTC-Temperature-Sensor-With-Arduino/
+
+
+
+// Parameters to calculate NTC resistance and temperature.
+// Figures are based on thermistor B57891M0103K000 from EPCOS (TDK)
+const float Vin=3.3;     // [V] 
+const float Vref=2.56;   // Reference voltage used by TinyAT ADC       
+//const float R3=22000;  // Resistor R3 [ohm] (Schematic says 20K, but I only had 22k)
+const float R3=12692;    // Resistor R3 [ohm]    //Readings seem out, so adjust R3 here to compensate
+const float R4=10000;    // Resistor R4 [ohm]
+const float R0=10000;    // Resistance of thermistor at 25deg C T0 [ohm]
+const float T0=298.15;   // T0 in Kelvin [K] 25deg C
+const float T1=273.15;   // [K] in datasheet 0º C
+const float T2=373.15;   // [K] in datasheet 100° C
+const float RT1=32014;   // [ohms]  resistance in T1 from datasheet
+const float RT2=697.22;  // [ohms]   resistance in T2 from datasheet
+float beta=3950;    // initial parameters [K]  from datasheet
+float Rinf=0.0;    // initial parameters [ohm]   
+float Vout=0.0;    // Vout in A0 
+float Rntc=0.0;    // Current resistance of NTC
+float Rp=0.0;      // value of R3 and Rntc in parallel at current temp
+float TempK=0.0;   // variable output
+float TempC=0.0;   // variable output
+
+
 EmonCMS emoncms;
 
 os_timer_t myTimer;
@@ -75,7 +103,7 @@ void print_module_details(struct  cell_module *module) {
 
 void check_module_quick(struct  cell_module *module) {
   module->voltage = cell_read_voltage(module->address);
-  module->temperature = cell_read_board_temp(module->address);
+  module->temperature =  tempconvert(cell_read_board_temp(module->address));
 
   if (module->voltage >= 0 && module->voltage <= 5000) {
 
@@ -250,6 +278,25 @@ void mqttreconnect() {
   }
 }
 
+float tempconvert(float rawtemp) {
+  Vout=Vref*((float)(rawtemp)/1024.0); // calc voltage at ADC pin
+  Rp= R4*((Vin/Vout) - 1);    //calc value of Thermistor in parallel with R3
+  Rntc=1/((1/Rp)-(1/R3));     //calc Thermistur resistance
+  TempK=(beta/log(Rntc/Rinf)); // calc temperature in Kelvin
+  TempC=TempK-273.15;
+  /*
+  Serial.print("rawtemp = ");
+  Serial.print(rawtemp);
+  Serial.print("   Vout = ");
+  Serial.print(Vout);
+  Serial.print("   Rp = ");
+  Serial.print(Rp);
+  Serial.print("   Rntc = ");
+  Serial.println(Rntc);
+*/
+  return TempC;
+}
+
 void setup() {
   Serial.begin(19200);           // start serial for output
   Serial.println();
@@ -261,7 +308,11 @@ void setup() {
   //D4 is LED
   pinMode(D4, OUTPUT);
   LED_OFF;
-
+  
+  //Thermistor setup
+  beta=(log(RT1/RT2))/((1/T1)-(1/T2));
+  Rinf=R0*exp(-beta/T0);
+  
   Serial.println(F("DIY BMS Controller Startup"));
 
   initWire();
