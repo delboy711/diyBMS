@@ -50,7 +50,8 @@ bool runProvisioning;
 
 extern bool manual_balance;
 bool max_enabled = false;
-  
+int balance_status = 0;
+// 0=No balancing 1=Manual balancing started 2=Auto Balancing enabled 3=Auto Balancing enabled and bypass happening 4=A module is over max voltage
 
 //Configuration for thermistor conversion
 //use the datasheet to get this data.
@@ -86,33 +87,40 @@ os_timer_t myTimer;
 
 void avg_balance() {
   uint16_t avgint = 0;
+  float avgintf = 0.0;
+       
   if ((myConfig.autobalance_enabled == true) && (manual_balance == false)) {
     
     if (cell_array_max > 0) {
-    //Work out the average
+    //Work out the average 
     float avg = 0;
     for (int a = 0; a < cell_array_max; a++) {
-      avg += 1.0 * cell_array[a].voltage;
+      avgintf = cell_array[a].voltage/1000.0;
+      avg += 1.0 * avgintf;
     }
     avg = avg / cell_array_max;
-    avgint = avg;
-    Serial.println("Average cell voltage is currently : " + String(avg/1000));
-    Serial.println("Configured balance voltage : " + String(myConfig.balance_voltage));
-    if ( avg/1000 >= myConfig.balance_voltage )  {
-      for ( int a = 0; a < cell_array_max; a++) {
-        if (cell_array[a].voltage > avgint) {
-          cell_array[a].balance_target = avgint;
-        }
-      }
-    }  else {
 
+    avgint = avg;
+
+    balance_status = 2;
+    
+    //Serial.println("Average cell voltage is currently : " + String(avg*1000));
+    //Serial.println("Configured balance voltage : " + String(myConfig.balance_voltage*1000));
+
+    if ( avg >= myConfig.balance_voltage )  {
+      for ( int a = 0; a < cell_array_max; a++) {
+        if (cell_array[a].voltage > avg*1000) {
+          cell_array[a].balance_target = avg*1000;
+          balance_status = 3;
+        }
+      } 
+    }  else {
       for (int a = 0; a < cell_array_max; a++) {
-      command_set_bypass_voltage(cell_array[a].address,0);
-      }
-    }
-   }
-  }
+        command_set_bypass_voltage(cell_array[a].address,0); }}
+        } 
+  } else  balance_status = 0;    
 }
+
 
 
 // Set up  MQTT
@@ -285,7 +293,8 @@ void updatemqtt(eeprom_settings myConfig, cell_module (&cell_array)[24], int cel
     JsonObject& root = jsonBuffer.createObject();  
     root["address"] = String(cell_array[a].address);
     root["voltage"] = String(cell_array[a].valid_values ? cell_array[a].voltage : 0);
-    root["temperature"] = String(cell_array[a].valid_values ? cell_array[a].temperature : 0);  
+    root["temperature"] = String(cell_array[a].valid_values ? cell_array[a].temperature : 0); 
+    root["balance_status"] = String(balance_status);
     char jsonout[256];
     root.printTo(jsonout);
     mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
@@ -437,6 +446,7 @@ void loop() {
         if (cell_array[a].voltage >= myConfig.max_voltage*1000) {
           cell_array[a].balance_target = myConfig.max_voltage*1000; 
            max_enabled = true;
+           balance_status = 4;
            Serial.println("Cell voltage : " + String(cell_array[a].voltage) + " Balance Target = " +  cell_array[a].balance_target  );
         }
       }

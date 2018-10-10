@@ -3,6 +3,7 @@
 #include <WiFiClient.h>
 
 extern uint8_t DEFAULT_SLAVE_ADDR_START_RANGE;
+extern int balance_status;
 
 //Implements WebServiceSubmit abstract/interface class
 void EmonCMS::postData(eeprom_settings myConfig, cell_module (&cell_array)[24], int cell_array_max) {
