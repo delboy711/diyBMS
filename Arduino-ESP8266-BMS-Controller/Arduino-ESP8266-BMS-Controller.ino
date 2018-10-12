@@ -268,7 +268,6 @@ void scani2cBus() {
 
   //We have 1 module
   cell_array_max = 0;
-
   //Scan the i2c bus looking for modules on start up
   for (uint8_t address = DEFAULT_SLAVE_ADDR_START_RANGE; address <= DEFAULT_SLAVE_ADDR_END_RANGE; address++ )
   {
@@ -289,7 +288,7 @@ void scani2cBus() {
 
       print_module_details( &cell_array[cell_array_max] );
 
-      cell_array_max++;
+      cell_array_max++;;
     }
   }
 }

@@ -166,9 +166,8 @@ void initWire() {
 }
 
 bool testModuleExists(uint8_t address) {
-  Wire.beginTransmission(address);
-  byte error2 = Wire.endTransmission();
-  if (error2 == 0)
+  read_uint16_from_cell(address, read_voltage);
+  if (i2cstatus == 2)
   {
       return true;
   }
