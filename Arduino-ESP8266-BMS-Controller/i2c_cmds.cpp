@@ -65,7 +65,6 @@ uint8_t cmdByte(uint8_t cmd) {
   return cmd;
 }
 
-uint8_t i2cstatus;
 
 uint16_t read_uint16_from_cell(uint8_t cell_id, uint8_t cmd) {
   send_command(cell_id, cmd);
@@ -157,7 +156,7 @@ uint8_t command_set_bypass_voltage(uint8_t cell_id, uint16_t  value) {
 }
 
 void initWire() {
-  Wire.setTimeout(1000);  //1000ms timeout
+  Wire.setTimeout(100);  //1000ms timeout  //Make timeout less than polling timer
   Wire.setClock(100000);  //100khz
   Wire.setClockStretchLimit(1000);
 

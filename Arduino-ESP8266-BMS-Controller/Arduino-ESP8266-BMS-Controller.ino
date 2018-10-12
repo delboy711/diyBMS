@@ -47,6 +47,7 @@ int cell_array_index = -1;
 int cell_array_max = 0;
 unsigned long next_submit;
 bool runProvisioning;
+uint8_t i2cstatus;
 
 extern bool manual_balance;
 bool max_enabled = false;
@@ -145,9 +146,22 @@ void print_module_details(struct  cell_module *module) {
 }
 
 void check_module_quick(struct  cell_module *module) {
-  module->voltage = cell_read_voltage(module->address);
-  module->temperature =  tempconvert(cell_read_board_temp(module->address));
-  module->bypass_status = cell_read_bypass_enabled_state(module->address);
+  uint16_t data = cell_read_voltage(module->address);
+  if ( i2cstatus == 2 ) {      //Is the data good?
+    module->voltage = data;
+    module->error_count -= 1;   //Good poll so decrement error count
+  } else module->error_count += 1;
+  data = cell_read_board_temp(module->address);
+  if ( i2cstatus == 2 ) {      //Is the data good?
+    float y = tempconvert(data);
+    if ( !isnan(y) ) module->temperature = y;  //Check it is a valid number
+    module->error_count -= 1;
+  } else module->error_count += 1;
+  data = cell_read_bypass_enabled_state(module->address);
+  if ( i2cstatus == 1 ) {
+    module->bypass_status = cell_read_bypass_enabled_state(module->address);
+    module->error_count -= 1;
+  } else module->error_count += 1;
 
   if (module->voltage >= 0 && module->voltage <= 5000) {
 
@@ -162,6 +176,16 @@ void check_module_quick(struct  cell_module *module) {
   } else {
     module->valid_values = false;
   }
+
+// I2C errors
+  if ( module->error_count < 0 ) {
+    module->error_count = 0; //If a negative number then good polling so clear count
+    module->lost_communication = false;    // Clear error status
+  }
+  if ( module->error_count >= BAD_I2C_POLLS ) {
+    module->lost_communication = true;
+  }
+  if ( module->error_count > BAD_I2C_POLLS+6 ) module->error_count = BAD_I2C_POLLS+6;    //Limit counter    
 }
 
 void check_module_full(struct  cell_module *module) {
@@ -295,6 +319,8 @@ void updatemqtt(eeprom_settings myConfig, cell_module (&cell_array)[24], int cel
     root["voltage"] = String(cell_array[a].valid_values ? cell_array[a].voltage : 0);
     root["temperature"] = String(cell_array[a].valid_values ? cell_array[a].temperature : 0); 
     root["balance_status"] = String(balance_status);
+    root["errors"] = String(cell_array[a].error_count);
+    root["comms_alarm"] = String(cell_array[a].lost_communication);
     char jsonout[256];
     root.printTo(jsonout);
     mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
@@ -326,7 +352,7 @@ void mqttreconnect() {
 float tempconvert(float rawtemp) {
   Vout=Vref*((float)(rawtemp)/1024.0); // calc voltage at ADC pin
   Rp= R4*((Vin/Vout) - 1);    //calc value of Thermistor in parallel with R3
-  Rntc=1/((1/Rp)-(1/R3));     //calc Thermistur resistance
+  Rntc=1/((1/Rp)-(1/R3));     //calc Thermistor resistance
   TempK=(beta/log(Rntc/Rinf)); // calc temperature in Kelvin
   TempC=TempK-273.15;
   /*
@@ -424,7 +450,7 @@ void loop() {
    if (cell_array_max > 0) {
 
     
-        /*for ( int a = 0; a < cell_array_max; a++) {
+        for ( int a = 0; a < cell_array_max; a++) {
           Serial.print(cell_array[a].address);
           Serial.print(':');
           Serial.print(cell_array[a].voltage);
@@ -432,9 +458,11 @@ void loop() {
           Serial.print(cell_array[a].temperature);
           Serial.print(':');
           Serial.print(cell_array[a].bypass_status);
+          Serial.print(':');
+          Serial.print(cell_array[a].error_count);
           Serial.print(' ');
         }
-        Serial.println();*/
+        Serial.println();
     
     if ((millis() > next_submit) && (WiFi.status() == WL_CONNECTED)) {
       //Update emoncms every 30 seconds

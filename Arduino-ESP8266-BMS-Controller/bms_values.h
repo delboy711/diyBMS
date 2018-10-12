@@ -51,6 +51,8 @@ struct cell_module {
   bool update_calibration;
   
   bool bypass_status;
+  int16_t error_count=0;         //Count of error polls
+  bool lost_communication= false; // Houston we have a problem
 };
 
 

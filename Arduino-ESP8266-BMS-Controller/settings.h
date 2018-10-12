@@ -26,6 +26,8 @@
 //URL of location to download  browser files
 #define FILES_URL "https://delboy711.github.io/diyBMS/"
 
+//How many bad i2c polls before declaring communication lost
+#define BAD_I2C_POLLS 10
 
 struct wifi_eeprom_settings {
   char wifi_ssid[32 + 1];

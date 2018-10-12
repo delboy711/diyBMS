@@ -4,6 +4,7 @@
 extern uint8_t DEFAULT_SLAVE_ADDR;
 extern uint8_t DEFAULT_SLAVE_ADDR_START_RANGE;
 extern uint8_t DEFAULT_SLAVE_ADDR_END_RANGE;
+extern uint8_t i2cstatus;
 
 uint8_t send_command(uint8_t cell_id, uint8_t cmd);
 uint8_t send_command(uint8_t cell_id, uint8_t cmd, uint8_t byteValue);
