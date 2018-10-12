@@ -186,6 +186,8 @@ void check_module_quick(struct  cell_module *module) {
     module->lost_communication = true;
   }
   if ( module->error_count > BAD_I2C_POLLS+6 ) module->error_count = BAD_I2C_POLLS+6;    //Limit counter    
+
+  updatemqtt(module);   //Publish to MQTT
 }
 
 void check_module_full(struct  cell_module *module) {
@@ -311,20 +313,20 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
 // TODO - Do stuff
 }
 
-void updatemqtt(eeprom_settings myConfig, cell_module (&cell_array)[24], int cell_array_max) {
-  for (int a = 0; a < cell_array_max; a++) {
-    DynamicJsonBuffer jsonBuffer(400);                              //Allocate buffer for JSON
-    JsonObject& root = jsonBuffer.createObject();  
-    root["address"] = String(cell_array[a].address);
-    root["voltage"] = String(cell_array[a].valid_values ? cell_array[a].voltage : 0);
-    root["temperature"] = String(cell_array[a].valid_values ? cell_array[a].temperature : 0); 
-    root["balance_status"] = String(balance_status);
-    root["errors"] = String(cell_array[a].error_count);
-    root["comms_alarm"] = String(cell_array[a].lost_communication);
-    char jsonout[256];
-    root.printTo(jsonout);
-    mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
-  }
+void updatemqtt( struct  cell_module *module ) {
+  DynamicJsonBuffer jsonBuffer(400);                              //Allocate buffer for JSON
+  JsonObject& root = jsonBuffer.createObject();  
+  root["address"] = String(module->address);
+  if (module->valid_values == true) {                     //Do not send junk data
+    root["voltage"] = String(module->valid_values ? module->voltage : 0);
+    root["temperature"] = String(module->temperature);
+  } 
+  root["bypass_status"] = String(module->bypass_status);
+  root["errors"] = String(module->error_count);
+  root["comms_alarm"] = String(module->lost_communication);
+  char jsonout[256];
+  root.printTo(jsonout);
+  mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
   return;
 }
 
@@ -480,8 +482,6 @@ void loop() {
       }
       if (max_enabled!=true) avg_balance();
       max_enabled = false;
-      //Update MQTT every 30 seconds
-      updatemqtt(myConfig, cell_array, cell_array_max);
       next_submit = millis() + 30000;
     }
   }
