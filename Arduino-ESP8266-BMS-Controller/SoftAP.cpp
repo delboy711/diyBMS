@@ -71,8 +71,7 @@ void handleProvision() {
   server.send(200, "application/json", "[1]\r\n\r\n");
 }
 
-
-void handleCancelAverageBalance() {
+void CancelAverageBalance() {
   if (cell_array_max > 0) {
     for (int a = 0; a < cell_array_max; a++) {
       command_set_bypass_voltage(cell_array[a].address,0);
@@ -81,12 +80,14 @@ void handleCancelAverageBalance() {
   manual_balance = false;
   balance_status = 0;
   
-  Serial.println("Cancelling balancing");
+  Serial.println("Cancelling balancing");  
+}
+void handleCancelAverageBalance() {
+  CancelAverageBalance();
   server.send(200, "application/json", "[1]\r\n\r\n");
 }
 
-
-void handleAboveAverageBalance() {
+uint16_t AboveAverageBalance() {
   uint16_t avgint = 0;
   if (cell_array_max > 0) {
     //Work out the average
@@ -107,7 +108,11 @@ void handleAboveAverageBalance() {
   
   manual_balance = true;
   balance_status = 1;
-  
+  return avgint;
+}
+
+void handleAboveAverageBalance() {
+  uint16_t avgint = AboveAverageBalance();
   server.send(200, "application/json", "[" + String(avgint) + "]\r\n\r\n");
 }
 
@@ -151,6 +156,7 @@ void handleSetLoadResistance() {
   server.send(500, "text/plain", "");
 }
 
+
 void handleSetEmonCMS() {
   /* Receives HTTP POST for configuring the emonCMS settings
     emoncms_enabled:1
@@ -178,10 +184,7 @@ void handleSetEmonCMS() {
   server.send(200, "text/plain", "");
 }
 
-void handleSetVoltCalib() {
-  uint8_t module =  server.arg("module").toInt();
-  float newValue = server.arg("value").toFloat();
-
+bool SetVoltCalib(uint8_t module, float newValue) {
   Serial.print("SetVoltCalib ");
   Serial.print(module);
   Serial.print(" = ");
@@ -189,27 +192,29 @@ void handleSetVoltCalib() {
 
   for ( int a = 0; a < cell_array_max; a++) {
     if (cell_array[a].address == module) {
-
       if (cell_array[a].voltage_calib != newValue) {
         cell_array[a].voltage_calib = newValue;
         cell_array[a].update_calibration = true;
+        return true;
       }
-      server.send(200, "text/plain", "");
-      return;
     }
   }
-  server.send(500, "text/plain", "");
+  return false; 
 }
-
-void handleSetTempCalib() {
+void handleSetVoltCalib() {
   uint8_t module =  server.arg("module").toInt();
   float newValue = server.arg("value").toFloat();
+  if ( SetVoltCalib(module, newValue) == true ) {
+      server.send(200, "text/plain", "");
+    } else server.send(500, "text/plain", "");
+}
 
+bool SetTempCalib(uint8_t module, float newValue) {
+    
   Serial.print("SetTempCalib ");
   Serial.print(module);
   Serial.print(" = ");
   Serial.println(newValue, 6);
-
   for ( int a = 0; a < cell_array_max; a++) {
     if (cell_array[a].address == module) {
       if (cell_array[a].temperature_calib != newValue) {
@@ -217,10 +222,18 @@ void handleSetTempCalib() {
         cell_array[a].update_calibration = true;
       }
       server.send(200, "text/plain", "");
-      return;
+      return true;
     }
   }
-  server.send(500, "text/plain", "");
+  return false;
+}
+
+void handleSetTempCalib() {
+  uint8_t module =  server.arg("module").toInt();
+  float newValue = server.arg("value").toFloat();
+  if ( SetTempCalib(module, newValue) == true ) {
+      server.send(200, "text/plain", "");
+    } else server.send(500, "text/plain", "");
 }
 
 void handleCellConfigurationJSON() {

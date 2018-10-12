@@ -310,6 +310,52 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
     return;
   }
 // TODO - Do stuff
+  uint8_t address;
+  float value;
+  if ( root.containsKey("address") ) address = root["address"];
+  if ( root.containsKey("value") ) value = root["value"];
+  uint8_t command = root["command"];
+  switch(command) {
+    case 1:                                     // Command 1 - resetESP
+      Serial.println("Restarting Controller");
+      delay(1000);
+      ESP.restart();
+      break;
+    case 2:                                     // Command 2 - Start Avg balance
+      Serial.println("Starting balancing");
+      AboveAverageBalance();
+      break;
+    case 3:                                     // Command 3 - Cancel Avg balance
+      CancelAverageBalance();
+      break;
+    case 4:                                     // Command 4 - Set Voltage Calibration
+      value = root["value"];
+      SetVoltCalib(address, value);
+      break;
+    case 5:                                     // Command 5 - Set Temp Calibration
+      value = root["value"];
+      SetTempCalib(address, value);
+      break;
+    case 6:                                     // Command 6 - General Settings
+      if( root.containsKey("autobalance") == true ) myConfig.autobalance_enabled = root["autobalance"];
+      if( root.containsKey("maxvolts") == true ) myConfig.max_voltage = root["maxvolts"];
+      if( root.containsKey("balance_voltage") == true ) myConfig.balance_voltage = root["balance_voltage"];
+      if( root.containsKey("balance_dev") == true ) myConfig.balance_dev = root["balance_dev"];      
+      if( root.containsKey("emoncms_enabled") == true ) myConfig.emoncms_enabled = root["emoncms_enabled"];
+      WriteConfigToEEPROM();
+      break;
+    case 7:
+      break;
+    case 8:
+      break;
+    case 9:
+      break;
+    case 10:
+      break;
+    default:
+      break;
+    
+  }
 }
 
 void updatemqtt( struct  cell_module *module ) {

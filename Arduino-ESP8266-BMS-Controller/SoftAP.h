@@ -7,6 +7,11 @@ void setupAccessPoint(void);
 void SetupManagementRedirect(void);
 
 void HandleWifiClient(void);
+uint16_t AboveAverageBalance();
+void CancelAverageBalance();
+bool SetVoltCalib(uint8_t module, float newValue);
+bool SetTempCalib(uint8_t module, float newValue);
+
 
 extern int cell_array_index;
 extern int cell_array_max;
