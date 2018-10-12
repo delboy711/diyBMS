@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>/home/derek/electronics/kicad/ESP8266_home_battery_controller/ESP8266_home_battery_controller.sch</source>
+    <date>Wed 01 Aug 2018 21:23:16 BST</date>
+    <tool>Eeschema 4.0.7</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title/>
+        <company/>
+        <rev/>
+        <date/>
+        <source>ESP8266_home_battery_controller.sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="U1">
+      <value>WeMos_mini</value>
+      <footprint>wemos_d1_mini:D1_mini_board</footprint>
+      <libsource lib="wemos_mini" part="WeMos_mini"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B614C1E</tstamp>
+    </comp>
+    <comp ref="J1">
+      <value>Conn_01x04_Female</value>
+      <footprint>Connectors_JST:JST_PH_S4B-PH-K_04x2.00mm_Angled</footprint>
+      <libsource lib="conn" part="Conn_01x04_Female"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B615F3B</tstamp>
+    </comp>
+    <comp ref="U2">
+      <value>AD5242</value>
+      <footprint>SMD_Packages:SO-16-N</footprint>
+      <libsource lib="ESP8266_home_battery_controller-cache" part="AD5242"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61661A</tstamp>
+    </comp>
+    <comp ref="R1">
+      <value>10K</value>
+      <footprint>Resistors_SMD:R_1206</footprint>
+      <libsource lib="device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61674C</tstamp>
+    </comp>
+    <comp ref="J3">
+      <value>Conn_01x03_Female</value>
+      <footprint>Connectors_JST:JST_PH_S3B-PH-K_03x2.00mm_Angled</footprint>
+      <libsource lib="conn" part="Conn_01x03_Female"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B617D7F</tstamp>
+    </comp>
+    <comp ref="J4">
+      <value>Conn_01x03_Female</value>
+      <footprint>Connectors_JST:JST_PH_S3B-PH-K_03x2.00mm_Angled</footprint>
+      <libsource lib="conn" part="Conn_01x03_Female"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B617E10</tstamp>
+    </comp>
+    <comp ref="R3">
+      <value>2K2</value>
+      <footprint>Resistors_SMD:R_1206</footprint>
+      <libsource lib="device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B618ED2</tstamp>
+    </comp>
+    <comp ref="R2">
+      <value>2K2</value>
+      <footprint>Resistors_SMD:R_1206</footprint>
+      <libsource lib="device" part="R"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B618F1B</tstamp>
+    </comp>
+    <comp ref="J2">
+      <value>Conn_01x03_Female</value>
+      <footprint>Connectors_JST:JST_PH_S3B-PH-K_03x2.00mm_Angled</footprint>
+      <libsource lib="conn" part="Conn_01x03_Female"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61BD6C</tstamp>
+    </comp>
+    <comp ref="U3">
+      <value>MAX5033AASA</value>
+      <footprint>SMD_Packages:SOIC-8-N</footprint>
+      <libsource lib="ESP8266_home_battery_controller-cache" part="MAX5033AASA"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61CA9A</tstamp>
+    </comp>
+    <comp ref="F1">
+      <value>50mA</value>
+      <footprint>Resistors_SMD:R_1812_HandSoldering</footprint>
+      <libsource lib="device" part="Polyfuse"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61CBA7</tstamp>
+    </comp>
+    <comp ref="C1">
+      <value>0.1uF XR7</value>
+      <footprint>Capacitors_SMD:C_1206</footprint>
+      <libsource lib="device" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61CF52</tstamp>
+    </comp>
+    <comp ref="C2">
+      <value>0.1uF XR7</value>
+      <footprint>Capacitors_SMD:C_1206</footprint>
+      <libsource lib="device" part="C"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61D2BC</tstamp>
+    </comp>
+    <comp ref="L1">
+      <value>220uH</value>
+      <footprint>Inductors_SMD:L_7.3x7.3_H3.5</footprint>
+      <libsource lib="device" part="L_Core_Ferrite"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61D452</tstamp>
+    </comp>
+    <comp ref="C3">
+      <value>33uF</value>
+      <footprint>Capacitors_SMD:C_0805_HandSoldering</footprint>
+      <libsource lib="device" part="CP1"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61D65D</tstamp>
+    </comp>
+    <comp ref="JP1">
+      <value>Battery power</value>
+      <footprint>Connectors:PINHEAD1-2</footprint>
+      <libsource lib="device" part="Jumper_NC_Small"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61D864</tstamp>
+    </comp>
+    <comp ref="D1">
+      <value>SS16</value>
+      <footprint>Diodes_SMD:D_2114</footprint>
+      <libsource lib="device" part="D"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61E57F</tstamp>
+    </comp>
+    <comp ref="D2">
+      <value>SS16</value>
+      <footprint>Diodes_SMD:D_2114</footprint>
+      <libsource lib="device" part="D_Schottky"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B61F25E</tstamp>
+    </comp>
+    <comp ref="U4">
+      <value>INA226</value>
+      <footprint>SMD_Packages:VSSOP-10</footprint>
+      <libsource lib="ESP8266_home_battery_controller-cache" part="INA226"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B620763</tstamp>
+    </comp>
+    <comp ref="J5">
+      <value>GS3</value>
+      <footprint>Connectors:GS3</footprint>
+      <libsource lib="conn" part="GS3"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B620DCF</tstamp>
+    </comp>
+    <comp ref="J6">
+      <value>GS3</value>
+      <footprint>Connectors:GS3</footprint>
+      <libsource lib="conn" part="GS3"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B620E83</tstamp>
+    </comp>
+    <comp ref="J7">
+      <value>GS3</value>
+      <footprint>Connectors:GS3</footprint>
+      <libsource lib="conn" part="GS3"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B6248E8</tstamp>
+    </comp>
+    <comp ref="J8">
+      <value>GS3</value>
+      <footprint>Connectors:GS3</footprint>
+      <libsource lib="conn" part="GS3"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5B624C95</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="ESP8266_home_battery_controller-cache" part="AD5242">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">AD5242</field>
+      </fields>
+      <pins>
+        <pin num="1" name="O1" type="output"/>
+        <pin num="2" name="A1" type="passive"/>
+        <pin num="3" name="W1" type="passive"/>
+        <pin num="4" name="B1" type="passive"/>
+        <pin num="5" name="VDD" type="power_in"/>
+        <pin num="6" name="~SHDN~" type="input"/>
+        <pin num="7" name="SCL" type="input"/>
+        <pin num="8" name="SDA" type="BiDi"/>
+        <pin num="9" name="AD0" type="input"/>
+        <pin num="10" name="AD1" type="input"/>
+        <pin num="11" name="GND" type="power_in"/>
+        <pin num="12" name="VSS" type="power_in"/>
+        <pin num="13" name="O2" type="output"/>
+        <pin num="14" name="B2" type="passive"/>
+        <pin num="15" name="W2" type="passive"/>
+        <pin num="16" name="A2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="C">
+      <description>Unpolarized capacitor</description>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="CP1">
+      <description>Polarised capacitor</description>
+      <footprints>
+        <fp>CP_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">CP1</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="conn" part="Conn_01x03_Female">
+      <description>Generic connector, single row, 01x03</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_??x*mm*</fp>
+        <fp>Connector*:*1x??x*mm*</fp>
+        <fp>Socket?Strip?Straight?1X*</fp>
+        <fp>Socket?Strip?Angled?1X*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x03_Female</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="conn" part="Conn_01x04_Female">
+      <description>Generic connector, single row, 01x04</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_??x*mm*</fp>
+        <fp>Connector*:*1x??x*mm*</fp>
+        <fp>Socket?Strip?Straight?1X*</fp>
+        <fp>Socket?Strip?Angled?1X*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x04_Female</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="D">
+      <description>Diode</description>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*SingleDiode</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="D_Schottky">
+      <description>Schottky diode</description>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*SingleDiode</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">D_Schottky</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="conn" part="GS3">
+      <description>3-pin jumper/solder bridge</description>
+      <footprints>
+        <fp>GS*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">GS3</field>
+        <field name="Footprint">Connectors:GS3</field>
+      </fields>
+      <pins>
+        <pin num="1" name="G1" type="passive"/>
+        <pin num="2" name="G2" type="passive"/>
+        <pin num="3" name="G3" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="ESP8266_home_battery_controller-cache" part="INA226">
+      <description>I2C Voltage Current and power monitor</description>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">INA226</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A1" type="input"/>
+        <pin num="2" name="A0" type="input"/>
+        <pin num="3" name="Alert" type="input"/>
+        <pin num="4" name="SDA" type="input"/>
+        <pin num="5" name="SCL" type="input"/>
+        <pin num="6" name="VS" type="input"/>
+        <pin num="7" name="GND" type="power_in"/>
+        <pin num="8" name="VBUS" type="input"/>
+        <pin num="9" name="IN-" type="input"/>
+        <pin num="10" name="IN+" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="Jumper_NC_Small">
+      <description>Jumper, normally closed</description>
+      <fields>
+        <field name="Reference">JP</field>
+        <field name="Value">Jumper_NC_Small</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="L_Core_Ferrite">
+      <description>Inductor with Ferrite Core</description>
+      <footprints>
+        <fp>Choke_*</fp>
+        <fp>*Coil*</fp>
+        <fp>Inductor_*</fp>
+        <fp>L_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">L</field>
+        <field name="Value">L_Core_Ferrite</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="ESP8266_home_battery_controller-cache" part="MAX5033AASA">
+      <description>500MA 3.3V 76V Input Switching regulator</description>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">MAX5033AASA</field>
+      </fields>
+      <pins>
+        <pin num="1" name="BST" type="input"/>
+        <pin num="2" name="VD" type="output"/>
+        <pin num="3" name="SGND" type="power_in"/>
+        <pin num="4" name="FB" type="input"/>
+        <pin num="5" name="ON/OFF" type="power_in"/>
+        <pin num="6" name="GND" type="power_in"/>
+        <pin num="7" name="VIN" type="power_in"/>
+        <pin num="8" name="LX" type="power_out"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="Polyfuse">
+      <description>resettable fuse, polymeric positive temperature coefficient (PPTC)</description>
+      <footprints>
+        <fp>*polyfuse*</fp>
+        <fp>*PTC*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">F</field>
+        <field name="Value">Polyfuse</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="device" part="R">
+      <description>Resistor</description>
+      <footprints>
+        <fp>R_*</fp>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="wemos_mini" part="WeMos_mini">
+      <description>WeMos D1 mini</description>
+      <docs>http://www.wemos.cc/Products/d1_mini.html</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">WeMos_mini</field>
+      </fields>
+      <pins>
+        <pin num="1" name="5V" type="power_in"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="D4" type="BiDi"/>
+        <pin num="4" name="D3" type="BiDi"/>
+        <pin num="5" name="D2" type="BiDi"/>
+        <pin num="6" name="D1" type="BiDi"/>
+        <pin num="7" name="Rx" type="BiDi"/>
+        <pin num="8" name="Tx" type="BiDi"/>
+        <pin num="9" name="Rst" type="BiDi"/>
+        <pin num="10" name="A0" type="BiDi"/>
+        <pin num="11" name="D0" type="BiDi"/>
+        <pin num="12" name="D5" type="BiDi"/>
+        <pin num="13" name="D6" type="BiDi"/>
+        <pin num="14" name="D7" type="BiDi"/>
+        <pin num="15" name="D8" type="BiDi"/>
+        <pin num="16" name="3.3V" type="power_out"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="device">
+      <uri>/usr/share/kicad/library/device.lib</uri>
+    </library>
+    <library logical="conn">
+      <uri>/usr/share/kicad/library/conn.lib</uri>
+    </library>
+    <library logical="ESP8266_home_battery_controller-cache">
+      <uri>/home/derek/electronics/kicad/ESP8266_home_battery_controller/ESP8266_home_battery_controller-cache.lib</uri>
+    </library>
+    <library logical="wemos_mini">
+      <uri>/home/derek/electronics/kicad/template/d1_mini_kicad/library/wemos_mini.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+3V3">
+      <node ref="U4" pin="6"/>
+      <node ref="J6" pin="1"/>
+      <node ref="J5" pin="1"/>
+      <node ref="J1" pin="1"/>
+      <node ref="J7" pin="1"/>
+      <node ref="R3" pin="1"/>
+      <node ref="R2" pin="1"/>
+      <node ref="J8" pin="1"/>
+      <node ref="JP1" pin="2"/>
+      <node ref="U2" pin="5"/>
+      <node ref="U1" pin="16"/>
+    </net>
+    <net code="2" name="Net-(D1-Pad2)">
+      <node ref="D1" pin="2"/>
+      <node ref="F1" pin="2"/>
+    </net>
+    <net code="3" name="Net-(J5-Pad2)">
+      <node ref="J5" pin="2"/>
+      <node ref="U4" pin="2"/>
+    </net>
+    <net code="4" name="Net-(U4-Pad3)">
+      <node ref="U4" pin="3"/>
+    </net>
+    <net code="5" name="GND">
+      <node ref="U3" pin="5"/>
+      <node ref="U1" pin="2"/>
+      <node ref="J6" pin="3"/>
+      <node ref="J5" pin="3"/>
+      <node ref="J1" pin="4"/>
+      <node ref="J2" pin="3"/>
+      <node ref="U2" pin="11"/>
+      <node ref="R1" pin="2"/>
+      <node ref="U3" pin="3"/>
+      <node ref="U2" pin="12"/>
+      <node ref="U3" pin="6"/>
+      <node ref="C3" pin="2"/>
+      <node ref="C1" pin="2"/>
+      <node ref="U4" pin="7"/>
+      <node ref="J7" pin="3"/>
+      <node ref="J8" pin="3"/>
+      <node ref="D2" pin="2"/>
+    </net>
+    <net code="6" name="+BATT">
+      <node ref="U3" pin="7"/>
+      <node ref="D1" pin="1"/>
+      <node ref="U4" pin="8"/>
+      <node ref="U4" pin="10"/>
+    </net>
+    <net code="7" name="Net-(J2-Pad2)">
+      <node ref="J2" pin="2"/>
+      <node ref="U4" pin="9"/>
+    </net>
+    <net code="8" name="Net-(F1-Pad1)">
+      <node ref="J2" pin="1"/>
+      <node ref="F1" pin="1"/>
+    </net>
+    <net code="9" name="Net-(C1-Pad1)">
+      <node ref="C1" pin="1"/>
+      <node ref="U3" pin="2"/>
+    </net>
+    <net code="10" name="Net-(C2-Pad1)">
+      <node ref="C2" pin="1"/>
+      <node ref="U3" pin="1"/>
+    </net>
+    <net code="11" name="Net-(C2-Pad2)">
+      <node ref="L1" pin="1"/>
+      <node ref="U3" pin="8"/>
+      <node ref="C2" pin="2"/>
+      <node ref="D2" pin="1"/>
+    </net>
+    <net code="12" name="Net-(C3-Pad1)">
+      <node ref="U3" pin="4"/>
+      <node ref="JP1" pin="1"/>
+      <node ref="L1" pin="2"/>
+      <node ref="C3" pin="1"/>
+    </net>
+    <net code="13" name="Net-(J7-Pad2)">
+      <node ref="J7" pin="2"/>
+      <node ref="U2" pin="9"/>
+    </net>
+    <net code="14" name="Net-(J8-Pad2)">
+      <node ref="J8" pin="2"/>
+      <node ref="U2" pin="10"/>
+    </net>
+    <net code="15" name="Net-(J6-Pad2)">
+      <node ref="U4" pin="1"/>
+      <node ref="J6" pin="2"/>
+    </net>
+    <net code="16" name="Net-(U2-Pad13)">
+      <node ref="U2" pin="13"/>
+    </net>
+    <net code="17" name="Net-(R1-Pad1)">
+      <node ref="U2" pin="6"/>
+      <node ref="U2" pin="1"/>
+      <node ref="R1" pin="1"/>
+    </net>
+    <net code="18" name="Net-(U1-Pad3)">
+      <node ref="U1" pin="3"/>
+    </net>
+    <net code="19" name="Net-(U1-Pad4)">
+      <node ref="U1" pin="4"/>
+    </net>
+    <net code="20" name="/SDA">
+      <node ref="U1" pin="5"/>
+      <node ref="J1" pin="2"/>
+      <node ref="R2" pin="2"/>
+      <node ref="U4" pin="4"/>
+      <node ref="U2" pin="8"/>
+    </net>
+    <net code="21" name="Net-(U1-Pad7)">
+      <node ref="U1" pin="7"/>
+    </net>
+    <net code="22" name="Net-(U1-Pad8)">
+      <node ref="U1" pin="8"/>
+    </net>
+    <net code="23" name="Net-(U1-Pad9)">
+      <node ref="U1" pin="9"/>
+    </net>
+    <net code="24" name="Net-(U1-Pad10)">
+      <node ref="U1" pin="10"/>
+    </net>
+    <net code="25" name="Net-(U1-Pad11)">
+      <node ref="U1" pin="11"/>
+    </net>
+    <net code="26" name="Net-(U1-Pad12)">
+      <node ref="U1" pin="12"/>
+    </net>
+    <net code="27" name="Net-(U1-Pad13)">
+      <node ref="U1" pin="13"/>
+    </net>
+    <net code="28" name="Net-(U1-Pad14)">
+      <node ref="U1" pin="14"/>
+    </net>
+    <net code="29" name="Net-(U1-Pad15)">
+      <node ref="U1" pin="15"/>
+    </net>
+    <net code="30" name="Net-(J4-Pad1)">
+      <node ref="U2" pin="16"/>
+      <node ref="J4" pin="1"/>
+    </net>
+    <net code="31" name="Net-(J3-Pad1)">
+      <node ref="U2" pin="2"/>
+      <node ref="J3" pin="1"/>
+    </net>
+    <net code="32" name="Net-(J3-Pad2)">
+      <node ref="U2" pin="3"/>
+      <node ref="J3" pin="2"/>
+    </net>
+    <net code="33" name="Net-(J3-Pad3)">
+      <node ref="J3" pin="3"/>
+      <node ref="U2" pin="4"/>
+    </net>
+    <net code="34" name="+5VA">
+      <node ref="U1" pin="1"/>
+    </net>
+    <net code="35" name="Net-(J4-Pad2)">
+      <node ref="U2" pin="15"/>
+      <node ref="J4" pin="2"/>
+    </net>
+    <net code="36" name="Net-(J4-Pad3)">
+      <node ref="U2" pin="14"/>
+      <node ref="J4" pin="3"/>
+    </net>
+    <net code="37" name="/SCL">
+      <node ref="U4" pin="5"/>
+      <node ref="U1" pin="6"/>
+      <node ref="J1" pin="3"/>
+      <node ref="R3" pin="2"/>
+      <node ref="U2" pin="7"/>
+    </net>
+  </nets>
+</export>

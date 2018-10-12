@@ -1,0 +1,11 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP INA226
+D I2C Voltage Current and power monitor
+$ENDCMP
+#
+$CMP MAX5033AASA
+D 500MA 3.3V 76V Input Switching regulator
+$ENDCMP
+#
+#End Doc Library
