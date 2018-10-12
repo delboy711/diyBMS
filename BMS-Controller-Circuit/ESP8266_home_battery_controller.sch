@@ -6,8 +6,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
 Title "Smart Controller for diyBMS"
-Date ""
-Rev ""
+Date "2018-10-12"
+Rev "0.2"
 Comp ""
 Comment1 ""
 Comment2 ""
@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L wemos_mini:WeMos_mini U1
+L wemos:WeMos_mini U1
 U 1 1 5B614C1E
 P 6450 2200
 F 0 "U1" H 6450 2700 60  0000 C CNN
@@ -37,7 +37,7 @@ F 3 "" H 5100 1400 50  0001 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L ESP8266_home_battery_controller-rescue:AD5242 U2
+L AD5242:AD5242 U2
 U 1 1 5B61661A
 P 9100 3100
 F 0 "U2" H 8750 3700 50  0000 L CNN
@@ -53,7 +53,7 @@ U 1 1 5B61674C
 P 9600 4050
 F 0 "R1" V 9680 4050 50  0000 C CNN
 F 1 "10K" V 9600 4050 50  0000 C CNN
-F 2 "Resistors_SMD:R_1206" V 9530 4050 50  0001 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 9530 4050 50  0001 C CNN
 F 3 "" H 9600 4050 50  0001 C CNN
 	1    9600 4050
 	1    0    0    -1  
@@ -73,7 +73,6 @@ Wire Wire Line
 	7150 1850 6950 1850
 Wire Wire Line
 	5950 1950 5450 1950
-Connection ~ 9100 3800
 Wire Wire Line
 	9600 3400 9750 3400
 Wire Wire Line
@@ -181,7 +180,7 @@ U 1 1 5B618ED2
 P 7500 2900
 F 0 "R3" V 7580 2900 50  0000 C CNN
 F 1 "1K" V 7500 2900 50  0000 C CNN
-F 2 "Resistors_SMD:R_1206" V 7430 2900 50  0001 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 7430 2900 50  0001 C CNN
 F 3 "" H 7500 2900 50  0001 C CNN
 	1    7500 2900
 	1    0    0    -1  
@@ -192,7 +191,7 @@ U 1 1 5B618F1B
 P 7750 2900
 F 0 "R2" V 7830 2900 50  0000 C CNN
 F 1 "1K" V 7750 2900 50  0000 C CNN
-F 2 "Resistors_SMD:R_1206" V 7680 2900 50  0001 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 7680 2900 50  0001 C CNN
 F 3 "" H 7750 2900 50  0001 C CNN
 	1    7750 2900
 	1    0    0    -1  
@@ -280,7 +279,7 @@ Battery -ve
 Text Notes 2000 2400 1    60   ~ 0
 Shunt
 $Comp
-L ESP8266_home_battery_controller-rescue:MAX5033AASA U3
+L ESP8266_home_battery_controller:MAX5033AASA U3
 U 1 1 5B61CA9A
 P 1950 5150
 F 0 "U3" H 1550 5450 60  0000 C CNN
@@ -320,7 +319,7 @@ U 1 1 5B61CF52
 P 2450 5500
 F 0 "C1" H 2475 5600 50  0000 L CNN
 F 1 "100 nF XR7" H 2050 5400 50  0000 L CNN
-F 2 "Capacitors_SMD:C_1206" H 2488 5350 50  0001 C CNN
+F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.42x1.75mm_HandSolder" H 2488 5350 50  0001 C CNN
 F 3 "" H 2450 5500 50  0001 C CNN
 	1    2450 5500
 	1    0    0    -1  
@@ -339,7 +338,7 @@ U 1 1 5B61D2BC
 P 2600 5050
 F 0 "C2" H 2625 5150 50  0000 L CNN
 F 1 "100 nF XR7" H 2625 4950 50  0000 L CNN
-F 2 "Capacitors_SMD:C_1206" H 2638 4900 50  0001 C CNN
+F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.42x1.75mm_HandSolder" H 2638 4900 50  0001 C CNN
 F 3 "" H 2600 5050 50  0001 C CNN
 	1    2600 5050
 	0    -1   -1   0   
@@ -410,7 +409,7 @@ $EndComp
 Wire Wire Line
 	2950 5650 2950 5600
 $Comp
-L ESP8266_home_battery_controller-rescue:INA226 U4
+L ESP8266_home_battery_controller:INA226 U4
 U 1 1 5B620763
 P 3450 2950
 F 0 "U4" H 3150 3550 60  0000 C CNN
@@ -639,7 +638,7 @@ U 1 1 5B632D87
 P 9750 2900
 F 0 "R4" V 9830 2900 50  0000 C CNN
 F 1 "0R" V 9750 2900 50  0000 C CNN
-F 2 "Resistors_SMD:R_1206" V 9680 2900 50  0001 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 9680 2900 50  0001 C CNN
 F 3 "" H 9750 2900 50  0001 C CNN
 	1    9750 2900
 	0    1    1    0   
@@ -652,7 +651,7 @@ U 1 1 5B633433
 P 9750 3200
 F 0 "R5" V 9830 3200 50  0000 C CNN
 F 1 "0R" V 9750 3200 50  0000 C CNN
-F 2 "Resistors_SMD:R_1206" V 9680 3200 50  0001 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 9680 3200 50  0001 C CNN
 F 3 "" H 9750 3200 50  0001 C CNN
 	1    9750 3200
 	0    1    1    0   
@@ -677,7 +676,7 @@ U 1 1 5B63A183
 P 7150 2000
 F 0 "C4" H 7175 2100 50  0000 L CNN
 F 1 "100 nF" H 7175 1900 50  0000 L CNN
-F 2 "Capacitors_SMD:C_1206" H 7188 1850 50  0001 C CNN
+F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.42x1.75mm_HandSolder" H 7188 1850 50  0001 C CNN
 F 3 "" H 7150 2000 50  0001 C CNN
 	1    7150 2000
 	1    0    0    -1  
@@ -700,7 +699,7 @@ U 1 1 5B63D407
 P 4450 2750
 F 0 "C5" H 4475 2850 50  0000 L CNN
 F 1 "100 nF" H 4475 2650 50  0000 L CNN
-F 2 "Capacitors_SMD:C_1206" H 4488 2600 50  0001 C CNN
+F 2 "Capacitor_SMD:C_1206_3216Metric_Pad1.42x1.75mm_HandSolder" H 4488 2600 50  0001 C CNN
 F 3 "" H 4450 2750 50  0001 C CNN
 	1    4450 2750
 	1    0    0    -1  
@@ -778,7 +777,7 @@ U 1 1 5BA1F4A2
 P 2100 2450
 F 0 "R6" V 2180 2450 50  0000 C CNN
 F 1 "10R" V 2100 2450 50  0000 C CNN
-F 2 "Resistors_SMD:R_1206" V 2030 2450 50  0001 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 2030 2450 50  0001 C CNN
 F 3 "" H 2100 2450 50  0001 C CNN
 	1    2100 2450
 	-1   0    0    1   
@@ -789,7 +788,7 @@ U 1 1 5BA1F730
 P 2000 2750
 F 0 "R7" V 2080 2750 50  0000 C CNN
 F 1 "10R" V 2000 2750 50  0000 C CNN
-F 2 "Resistors_SMD:R_1206" V 1930 2750 50  0001 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" V 1930 2750 50  0001 C CNN
 F 3 "" H 2000 2750 50  0001 C CNN
 	1    2000 2750
 	-1   0    0    1   
@@ -873,15 +872,4 @@ Wire Wire Line
 Connection ~ 5650 3100
 Wire Wire Line
 	5650 3100 7500 3100
-$Comp
-L Connector:Conn_01x03_Female J10
-U 1 1 5BA5825A
-P 1600 850
-F 0 "J10" H 1627 876 50  0000 L CNN
-F 1 "Conn_01x03_Female" H 1627 785 50  0000 L CNN
-F 2 "" H 1600 850 50  0001 C CNN
-F 3 "~" H 1600 850 50  0001 C CNN
-	1    1600 850 
-	1    0    0    -1  
-$EndComp
 $EndSCHEMATC

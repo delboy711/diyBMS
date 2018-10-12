@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name AD5242)(type Legacy)(uri ${KIPRJMOD}/AD5242.lib)(options "")(descr ""))
+  (lib (name ESP8266_home_battery_controller)(type Legacy)(uri ${KIPRJMOD}/ESP8266_home_battery_controller.lib)(options "")(descr ""))
+)
