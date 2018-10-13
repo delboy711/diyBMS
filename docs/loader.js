@@ -54,7 +54,7 @@ function refreshConfig() {
 		var myswitch = $( "#mqtt_enabled" );
 		myswitch[0].selectedIndex = data.mqtt_enabled ? 1:0;
 		myswitch.slider( "refresh" );		
-		$("#mqtt_host").val( data.mqt_host );
+		$("#mqtt_host").val( data.mqtt_host );
 				
 		var myswitch_autobalance = $( "#autobalance_enabled" );
 		myswitch_autobalance[0].selectedIndex = data.autobalance_enabled ? 1:0;
@@ -311,6 +311,8 @@ script.onload = function(){
 	<label for="mqtt_host">Host:</label> \
 	<input id="mqtt_host" name="mqtt_host" size="64" type="text" /> \
 	</div> \
+	<div class="ui-field-contain"> \
+    <label for="submit-3"></label> \
 	\
 	<h4>Balancing Settings</h4> \
 	<label for="autobalance_enabled">Auto Balance enabled</label> \

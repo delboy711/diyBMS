@@ -16,8 +16,6 @@
 #define AP_TIMEOUT 600
 // WiFi connect timeout in secs after which ESP8266 will enter hotspot mode
 #define WIFI_TIMEOUT 120
-// IP address or mDNS name of MQTT broker
-#define MQTTSERVER  "192.168.1.4"
 // MQTT topic to send updates to
 #define MQTT_TOPIC "diybms"
 // MQTT topic to  listen for commands from
@@ -46,6 +44,8 @@ struct eeprom_settings {
   float max_voltage;
   float balance_voltage;
   float balance_dev;
+  char mqtt_host[64 + 1];
+  bool mqtt_enabled;
   };
 extern wifi_eeprom_settings myConfig_WIFI;
 extern eeprom_settings myConfig;

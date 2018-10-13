@@ -30,18 +30,23 @@ uint32_t calculateCRC32(const uint8_t *data, size_t length)
 
 
 void FactoryResetSettings() {
-  const char emoncms_host[] = "192.168.0.26";
+  const char emoncms_host[] = "192.168.0.4";
   const char emoncms_apikey[]="1234567890abcdef1234567890abcdef";
   const char emoncms_url[]="/emoncms/input/bulk?data=";
+  const char mqtt_host[] = "192.168.0.4";
 
   strcpy(myConfig.emoncms_host, emoncms_host );
   strcpy(myConfig.emoncms_apikey, emoncms_apikey);
   strcpy(myConfig.emoncms_url, emoncms_url);
+  strcpy(myConfig.mqtt_host, mqtt_host );
+  
 
   myConfig.emoncms_enabled=false;
   myConfig.emoncms_node_offset = 50 - 24;//DEFAULT_SLAVE_ADDR_START_RANGE;
   myConfig.emoncms_httpPort = 80;
 
+  myConfig.mqtt_enabled=false;
+  
   WriteConfigToEEPROM();
 }
 

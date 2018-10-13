@@ -125,7 +125,8 @@ void avg_balance() {
 
 
 // Set up  MQTT
-const char* mqttServerName = MQTTSERVER;
+char* mqttServerName = myConfig.mqtt_host;
+
 WiFiClient espClient;
 PubSubClient mqttclient(espClient);
 
@@ -187,7 +188,7 @@ void check_module_quick(struct  cell_module *module) {
   }
   if ( module->error_count > BAD_I2C_POLLS+6 ) module->error_count = BAD_I2C_POLLS+6;    //Limit counter    
 
-  updatemqtt(module);   //Publish to MQTT
+  if(myConfig.mqtt_enabled == true) updatemqtt(module);   //Publish to MQTT
 }
 
 void check_module_full(struct  cell_module *module) {
@@ -475,20 +476,22 @@ void setup() {
   Serial.print(F(". Connected IP:"));
   Serial.println(WiFi.localIP());
   //Setup MQTT
-  mqttclient.setServer(mqttServerName, 1883);
-  mqttclient.setCallback(mqttcallback);
+  if(myConfig.mqtt_enabled == true) {
+    mqttclient.setServer(mqttServerName, 1883);
+    mqttclient.setCallback(mqttcallback);
+  }
 
   SetupManagementRedirect();
 }
 
 void loop() {
   // Ensure we are connected to MQTT
-  if (!mqttclient.connected()) {
+  if (myConfig.mqtt_enabled == true && !mqttclient.connected()) {
     mqttreconnect();
   }
   for ( int j=0; j<=3; j++) {
     HandleWifiClient();
-    mqttclient.loop();
+    if(myConfig.mqtt_enabled == true) mqttclient.loop();
     yield();
     delay(250);
   }
