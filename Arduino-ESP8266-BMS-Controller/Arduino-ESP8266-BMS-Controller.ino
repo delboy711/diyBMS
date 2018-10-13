@@ -287,7 +287,7 @@ void scani2cBus() {
       command_set_bypass_voltage(address, 0);
 
       print_module_details( &cell_array[cell_array_max] );
-
+      delay(50);
       cell_array_max++;;
     }
   }
