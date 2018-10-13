@@ -179,9 +179,20 @@ void handleSetEmonCMS() {
   server.arg("emoncms_url").toCharArray(myConfig.emoncms_url, sizeof(myConfig.emoncms_url));
   server.arg("emoncms_apikey").toCharArray(myConfig.emoncms_apikey, sizeof(myConfig.emoncms_apikey));
 
+  bool current_mqtt_enabled = myConfig.mqtt_enabled;
+  myConfig.mqtt_enabled = (server.arg("mqtt_enabled").toInt() == 1) ? true : false;
+  server.arg("mqtt_host").toCharArray(myConfig.mqtt_host, sizeof(myConfig.mqtt_host));
+
+
   WriteConfigToEEPROM();
 
   server.send(200, "text/plain", "");
+
+  if (  myConfig.mqtt_enabled != current_mqtt_enabled ) {
+    //MQTT config changed so reboot
+    delay(1000);
+    ESP.restart();
+  }
 }
 
 bool SetVoltCalib(uint8_t module, float newValue) {
@@ -264,6 +275,8 @@ void handleSettingsJSON() {
                    + ",\"emoncms_host\":\"" + String(myConfig.emoncms_host) + "\""
                    + ",\"emoncms_apikey\":\"" + String(myConfig.emoncms_apikey) + "\""
                    + ",\"emoncms_url\":\"" + String(myConfig.emoncms_url) + "\""
+                   + ",\"mqtt_enabled\":" + (myConfig.mqtt_enabled ? String("true") : String("false"))
+                   + ",\"mqtt_host\":\"" + String(myConfig.mqtt_host) + "\""
                    + ",\"autobalance_enabled\":" + (myConfig.autobalance_enabled ? String("true") : String("false"))
                    + ",\"max_voltage\":\"" + String(myConfig.max_voltage) + "\""
                    + ",\"balance_voltage\":\"" + String(myConfig.balance_voltage) + "\""

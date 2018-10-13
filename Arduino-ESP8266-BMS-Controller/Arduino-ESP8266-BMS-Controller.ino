@@ -147,12 +147,17 @@ void print_module_details(struct  cell_module *module) {
 }
 
 void check_module_quick(struct  cell_module *module) {
-  uint16_t data = cell_read_voltage(module->address);
+  //Start off assuming good data
+  module->valid_values = true;
+  
+  module->voltage = cell_read_voltage(module->address);
   if ( i2cstatus == 2 ) {      //Is the data good?
-    module->voltage = data;
     module->error_count -= 1;   //Good poll so decrement error count
-  } else module->error_count += 1;
-  data = cell_read_board_temp(module->address);
+  } else {                      //Bad data
+    module->error_count += 1;
+    module->valid_values = false;
+  }
+  uint16_t data = cell_read_board_temp(module->address);
   if ( i2cstatus == 2 ) {      //Is the data good?
     float y = tempconvert(data);
     if ( !isnan(y) ) module->temperature = y;  //Check it is a valid number
@@ -166,14 +171,13 @@ void check_module_quick(struct  cell_module *module) {
 
   if (module->voltage >= 0 && module->voltage <= 5000) {
 
-    if ( module->voltage > module->max_voltage || module->valid_values == false) {
+    if ( module->voltage > module->max_voltage && module->valid_values == true) {
       module->max_voltage = module->voltage;
     }
-    if ( module->voltage < module->min_voltage || module->valid_values == false) {
+    if ( module->voltage < module->min_voltage && module->valid_values == true) {
       module->min_voltage = module->voltage;
     }
 
-    module->valid_values = true;
   } else {
     module->valid_values = false;
   }
@@ -364,10 +368,10 @@ void updatemqtt( struct  cell_module *module ) {
   JsonObject& root = jsonBuffer.createObject();  
   root["address"] = String(module->address);
   if (module->valid_values == true) {                     //Do not send junk data
-    root["voltage"] = String(module->valid_values ? module->voltage : 0);
-    root["temperature"] = String(module->temperature);
+    root["volts"] = String(module->valid_values ? module->voltage : 0);
+    root["temp"] = String(module->temperature);
   } 
-  root["bypass_status"] = String(module->bypass_status);
+  root["bypass"] = String(module->bypass_status);
   root["errors"] = String(module->error_count);
   root["comms_alarm"] = String(module->lost_communication);
   char jsonout[256];
@@ -455,6 +459,11 @@ void setup() {
     setupAccessPoint();
   }
 
+//Before scanning i2c bus wait for 10 seconds to allow
+//modules to enter panic mode
+//this avoids lock ups
+  Serial.println("Delay to allow modules to enter panic mode");
+  delay(10000);
   scani2cBus();
 
   //Ensure we service the cell modules every 0.5 seconds
