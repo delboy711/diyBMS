@@ -50,6 +50,12 @@ function refreshConfig() {
 		$("#emoncms_httpPort").val( data.emoncms_httpPort );
 		$("#emoncms_node_offset").val( data.emoncms_node_offset );
 		$("#emoncms_url").val( data.emoncms_url );
+		
+		var myswitch = $( "#mqtt_enabled" );
+		myswitch[0].selectedIndex = data.mqtt_enabled ? 1:0;
+		myswitch.slider( "refresh" );		
+		$("#mqtt_host").val( data.mqt_host );
+				
 		var myswitch_autobalance = $( "#autobalance_enabled" );
 		myswitch_autobalance[0].selectedIndex = data.autobalance_enabled ? 1:0;
 		myswitch_autobalance.slider( "refresh" );
@@ -257,7 +263,7 @@ script.onload = function(){
 	<div role="main" data-role="ui-content"> \
 	<h1>Configuration</h1> \
 	<div> \
-	<h2>emonCMS Integration</h2> \
+	<h4>emonCMS Settings</h4> \
 	<form id="form_emoncms" method="POST" action="'+rooturl+'setemoncms">\
 	<div class="ui-field-contain"> \
 	<label for="emoncms_enabled">emonCMS enabled</label> \
@@ -291,6 +297,21 @@ script.onload = function(){
 	</div> \
 	<div class="ui-field-contain"> \
     <label for="submit-3"></label> \
+    	<h4>MQTT Settings</h4> \
+	<form id="form_mqtt" method="POST" action="'+rooturl+'setmqtt">\
+	<div class="ui-field-contain"> \
+	<label for="mqtt_enabled">MQTT enabled</label> \
+	<select data-role="slider" id="mqtt_enabled" name="mqtt_enabled"> \
+	<option value="0">Off</option> \
+	<option value="1">On</option> \
+	</select> \
+	</div> \
+	\
+	<div class="ui-field-contain"> \
+	<label for="mqtt_host">Host:</label> \
+	<input id="mqtt_host" name="mqtt_host" size="64" type="text" /> \
+	</div> \
+	\
 	<h4>Balancing Settings</h4> \
 	<label for="autobalance_enabled">Auto Balance enabled</label> \
 	<select data-role="slider" id="autobalance_enabled" name="autobalance_enabled"> \
