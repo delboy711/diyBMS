@@ -41,6 +41,8 @@ extern "C"
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 
+#define DEBUG 1
+
 //Allow up to 24 modules
 cell_module cell_array[24];
 int cell_array_index = -1;
@@ -349,13 +351,18 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
       if( root.containsKey("emoncms_enabled") == true ) myConfig.emoncms_enabled = root["emoncms_enabled"];
       WriteConfigToEEPROM();
       break;
-    case 7:
+    case 7:                                     // Command 7 - Provision
+      runProvisioning = true;
       break;
     case 8:
       break;
     case 9:
       break;
-    case 10:
+    case 10:                                            //Close Charger Relay on D5
+      digitalWrite(D5, HIGH);
+      break;
+    case 11:                                            //Open Charger Relay on D5
+      digitalWrite(D5, LOW);
       break;
     default:
       break;
@@ -431,6 +438,11 @@ void setup() {
   //D4 is LED
   pinMode(D4, OUTPUT);
   LED_OFF;
+  //D5 is Charger Relay output
+  pinMode(D5, OUTPUT);
+  digitalWrite(D5, LOW);
+  //D0 is Smoke Detector input
+  pinMode(D0, INPUT);
   
   //Thermistor setup
   beta=(log(RT1/RT2))/((1/T1)-(1/T2));
@@ -507,21 +519,20 @@ void loop() {
 
 
    if (cell_array_max > 0) {
-
-    
+        //Debug messages to MQTT
+#ifdef DEBUG
+        String debug_message="";
+        //Publish to MQTT
         for ( int a = 0; a < cell_array_max; a++) {
-          Serial.print(cell_array[a].address);
-          Serial.print(':');
-          Serial.print(cell_array[a].voltage);
-          Serial.print(':');
-          Serial.print(cell_array[a].temperature);
-          Serial.print(':');
-          Serial.print(cell_array[a].bypass_status);
-          Serial.print(':');
-          Serial.print(cell_array[a].error_count);
-          Serial.print(' ');
+          debug_message += String(cell_array[a].address) + F(":") + String(cell_array[a].voltage) + F(":");;
+          debug_message += String(cell_array[a].temperature) + F(":") + String(cell_array[a].bypass_status) + F(":");
+          debug_message += String(cell_array[a].error_count) + F(" ");
         }
-        Serial.println();
+        mqttclient.beginPublish("diybmsdebug",debug_message.length(), false);    //New function in PubSubClient to publish long messages
+        mqttclient.print(debug_message);
+        mqttclient.endPublish();
+        
+#endif
     
     if ((millis() > next_submit) && (WiFi.status() == WL_CONNECTED)) {
       //Update emoncms every 30 seconds
@@ -541,6 +552,12 @@ void loop() {
       max_enabled = false;
       next_submit = millis() + 30000;
     }
+  }
+
+  if(digitalRead(D0) == true ) {    //Smoke detected, shutdown and sound alarms
+    digitalWrite(D5, LOW);          //Shutdown charger
+                                    //Shutdown inverter
+    mqttclient.publish(MQTT_TOPIC, "{smoke_alarm:1}");    //Send alarm to MQTT
   }
 }//end of loop
 

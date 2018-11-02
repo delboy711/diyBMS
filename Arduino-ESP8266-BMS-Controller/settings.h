@@ -22,8 +22,8 @@
 #define MQTT_COMMAND_TOPIC "diybms_command"
 
 //URL of location to download  browser files
-#define FILES_URL "https://delboy711.github.io/diyBMS/"
-//#define FILES_URL "http://192.168.1.4/emoncms/"
+//#define FILES_URL "https://delboy711.github.io/diyBMS/"
+#define FILES_URL "http://192.168.1.4/emoncms/"
 
 //How many bad i2c polls before declaring communication lost
 #define BAD_I2C_POLLS 10
