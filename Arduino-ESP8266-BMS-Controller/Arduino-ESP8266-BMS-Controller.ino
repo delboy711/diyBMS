@@ -40,6 +40,9 @@ extern "C"
 #include "WebServiceSubmit.h"
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+
 
 #define DEBUG 1
 
@@ -208,12 +211,12 @@ void timerCallback(void *pArg) {
   LED_ON;
 
   if (runProvisioning) {
-    Serial.println("runProvisioning");
+    mqttprint("runProvisioning");
     uint8_t newCellI2CAddress = provision();
 
     if (newCellI2CAddress > 0) {
-      Serial.print("Found ");
-      Serial.println(newCellI2CAddress);
+      mqttprint("Found "+ String(newCellI2CAddress));
+      //Serial.println(newCellI2CAddress);
 
       cell_module m2;
       m2.address = newCellI2CAddress;
@@ -387,6 +390,13 @@ void updatemqtt( struct  cell_module *module ) {
   return;
 }
 
+// Print debug message to MQTT console
+void mqttprint ( String message ) {
+  mqttclient.beginPublish("diybmsdebug",message.length(), false);    //New function in PubSubClient to publish long messages
+  mqttclient.print(message);
+  mqttclient.endPublish();
+}
+
 void mqttreconnect() {
   // Loop until we're reconnected
   while (!mqttclient.connected()) {
@@ -502,10 +512,40 @@ void setup() {
     mqttclient.setCallback(mqttcallback);
   }
 
+  //Setup OTA Updates
+  ArduinoOTA.setHostname("diyBMS");
+    ArduinoOTA.onStart([]() {
+    String type;
+    if (ArduinoOTA.getCommand() == U_FLASH)
+      type = "sketch";
+    else // U_SPIFFS
+      type = "filesystem";
+
+    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+    Serial.println("Start updating " + type);
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+  ArduinoOTA.begin();
+  
+
   SetupManagementRedirect();
 }
 
 void loop() {
+  ArduinoOTA.handle();
   // Ensure we are connected to MQTT
   if (myConfig.mqtt_enabled == true && !mqttclient.connected()) {
     mqttreconnect();
@@ -528,24 +568,28 @@ void loop() {
           debug_message += String(cell_array[a].temperature) + F(":") + String(cell_array[a].bypass_status) + F(":");
           debug_message += String(cell_array[a].error_count) + F(" ");
         }
-        mqttclient.beginPublish("diybmsdebug",debug_message.length(), false);    //New function in PubSubClient to publish long messages
-        mqttclient.print(debug_message);
-        mqttclient.endPublish();
+        //mqttclient.beginPublish("diybmsdebug",debug_message.length(), false);    //New function in PubSubClient to publish long messages
+        mqttprint(debug_message);
+        //mqttclient.endPublish();
         
 #endif
     
     if ((millis() > next_submit) && (WiFi.status() == WL_CONNECTED)) {
       //Update emoncms every 30 seconds
       emoncms.postData(myConfig, cell_array, cell_array_max);
-      
-      Serial.println("Configured Maximum voltage : " + String(myConfig.max_voltage));
+#ifdef DEBUG
+      mqttprint ("Configured Maximum voltage : " + String(myConfig.max_voltage));
+      //Serial.println("Configured Maximum voltage : " + String(myConfig.max_voltage));
+#endif
       
       for (int a = 0; a < cell_array_max; a++) {
         if (cell_array[a].voltage >= myConfig.max_voltage*1000) {
           cell_array[a].balance_target = myConfig.max_voltage*1000; 
            max_enabled = true;
            balance_status = 4;
-           Serial.println("Cell voltage : " + String(cell_array[a].voltage) + " Balance Target = " +  cell_array[a].balance_target  );
+#ifdef DEBUG
+           mqttprint("Cell voltage : " + String(cell_array[a].voltage) + " Balance Target = " +  cell_array[a].balance_target  );
+#endif           
         }
       }
       if (max_enabled!=true) avg_balance();
