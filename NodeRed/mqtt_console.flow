@@ -1,0 +1,16 @@
+[{"id":"6358a1dd.ac922","type":"function","z":"c1ce24e.045e658","name":"Store and shift msg","func":"\n\n\n// 
+initialise the counter to 0 if it doesn't exist already\nvar text = context.get('text')|| 
+[];\n\ntext.push(msg);\nif (text.length > 30){\n    text.shift();\n    text.length = 30;\n} \n\n// store the 
+value back\ncontext.set('text',text);\n// make it part of the outgoing msg object\nmsg = {};\nmsg.payload = 
+text;\nreturn 
+msg;\n","outputs":1,"noerr":0,"x":470,"y":1420,"wires":[["d1556504.a7ddf8","41769394.aa5224"]]},{"id":"d1556504.a7ddf8","type":"debug","z":"c1ce24e.045e658","name":"mqtt 
+array","active":false,"console":"false","complete":"payload","x":790,"y":1440,"wires":[]},{"id":"41769394.aa5224","type":"ui_template","z":"c1ce24e.045e658","group":"f7926ff9.7f69b","name":"MQTT 
+Output","order":1,"width":"27","height":"13","format":"\n  <div ng-repeat=\"x in msg.payload\">\n <!-- <font 
+color=\"red\">{{x.topic}}</font>-->\n    <span>\n        {{x.payload}}\n    </span>\n 
+</div>\n","storeOutMessages":true,"fwdInMessages":true,"templateScope":"local","x":800,"y":1400,"wires":[[]]},{"id":"5e81b591.74c40c","type":"comment","z":"c1ce24e.045e658","name":"MQTT 
+Console","info":"This flow demonstrates how to view MQTT data\n\nIt is also a nice demonstration how you 
+can\nuse an array to shift data into the UI template\n\n\nUI Viewable:\nhttp://localhost:1880/ui\n\nWritten 
+by\nCory Guynn\n2016\nwww.InternetOfLEG0.com","x":220,"y":1320,"wires":[]},{"id":"c1307c92.e64c98","type":"mqtt 
+in","z":"c1ce24e.045e658","name":"","topic":"diybmsdebug","qos":"2","broker":"19211dbb.e6dee2","x":210,"y":1380,"wires":[["6358a1dd.ac922"]]},{"id":"f7926ff9.7f69b","type":"ui_group","z":"","name":"MQTT 
+Console","tab":"e1daa8c2.1fcdf8","disp":true,"width":"27","collapse":false},{"id":"19211dbb.e6dee2","type":"mqtt-broker","z":"","broker":"localhost","port":"1883","clientid":"","usetls":false,"verifyservercert":true,"compatmode":true,"keepalive":"15","cleansession":true,"birthTopic":"","birthQos":"0","birthRetain":"false","birthPayload":"","willTopic":"","willQos":"0","willRetain":"false","willPayload":""},{"id":"e1daa8c2.1fcdf8","type":"ui_tab","z":"","name":"Powerwall","icon":"dashboard","order":5}]
+
