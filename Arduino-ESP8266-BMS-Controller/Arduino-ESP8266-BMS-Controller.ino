@@ -149,8 +149,8 @@ void avg_balance() {
 // Set up  MQTT
 char* mqttServerName = myConfig.mqtt_host;
 
-WiFiClient espClient;
-PubSubClient mqttclient(espClient);
+//WiFiClient espClient;
+//PubSubClient mqttclient(espClient);
 
 void print_module_details(struct  cell_module *module) {
   Serial.print("Mod: ");
@@ -457,47 +457,10 @@ void updatebus() {
 }
 
 
-void updatemqtt( struct  cell_module *module ) {
-  DynamicJsonBuffer jsonBuffer(400);                              //Allocate buffer for JSON
-  JsonObject& root = jsonBuffer.createObject();  
-  root["address"] = String(module->address);
-  if (module->valid_values == true) {                     //Do not send junk data
-    root["volts"] = String(module->valid_values ? module->voltage : 0);
-    root["temp"] = String(module->temperature);
-  } 
-  root["bypass"] = String(module->bypass_status);
-  root["errors"] = String(module->error_count);
-  root["comms_alarm"] = String(module->lost_communication);
-  char jsonout[256];
-  root.printTo(jsonout);
-  mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
-  return;
-}
 
-// Print debug message to MQTT console
-void mqttprint ( String message ) {
-  mqttclient.beginPublish("diybmsdebug",message.length(), false);    //New function in PubSubClient to publish long messages
-  mqttclient.print(message);
-  mqttclient.endPublish();
-}
 
-void mqttreconnect() {
-  //int count=8;    //How many attempts shall we make?
-  // Loop until we're reconnected
-  //while (!mqttclient.connected() && count ) {
-    Serial.print("Attempting MQTT connection...");
-    // Create a random client ID
-    String clientId = "diyBMS-";
-    clientId += String(random(0xffff), HEX);
-    // Attempt to connect
-    if (mqttclient.connect(clientId.c_str())) {
-      Serial.println("connected");
-      mqttclient.subscribe(MQTT_COMMAND_TOPIC);
-    } else {
-      //Serial.print("failed, rc=");
-      //Serial.println(mqttclient.state());
-  }
-}
+
+
 
 float tempconvert(float rawtemp) {
   Vout=Vref*((float)(rawtemp)/1024.0); // calc voltage at ADC pin
