@@ -108,7 +108,7 @@ os_timer_t myTimer;
 INA_Class INA;  
 //INA226 INA;
 uint8_t devicesFound = 0;
-const float ina_correction = 2.13;   //Correction factor for voltage divider
+
 
 void avg_balance() {
   uint16_t avgint = 0;
@@ -173,23 +173,18 @@ void check_module_quick(struct  cell_module *module) {
   module->valid_values = true;
   
   module->voltage = cell_read_voltage(module->address);
-  if ( i2cstatus == 2 ) {      //Is the data good?
-    module->error_count -= 1;   //Good poll so decrement error count
-  } else {                      //Bad data
-    module->error_count += 1;
+  if ( i2cstatus != 2 ) {      //Is the data bad?          
     module->valid_values = false;
   }
   uint16_t data = cell_read_board_temp(module->address);
   if ( i2cstatus == 2 ) {      //Is the data good?
     float y = tempconvert(data);
     if ( !isnan(y) ) module->temperature = y;  //Check it is a valid number
-    module->error_count -= 1;
-  } else module->error_count += 1;
+  }
   data = cell_read_bypass_enabled_state(module->address);
   if ( i2cstatus == 1 ) {
     module->bypass_status = cell_read_bypass_enabled_state(module->address);
-    module->error_count -= 1;
-  } else module->error_count += 1;
+  }
 
   if (module->voltage >= 0 && module->voltage <= 5000) {
 
@@ -202,17 +197,7 @@ void check_module_quick(struct  cell_module *module) {
 
   } else {
     module->valid_values = false;
-  }
-
-// I2C errors
-  if ( module->error_count < 0 ) {
-    module->error_count = 0; //If a negative number then good polling so clear count
-    module->lost_communication = false;    // Clear error status
-  }
-  if ( module->error_count >= BAD_I2C_POLLS ) {
-    module->lost_communication = true;
-  }
-  if ( module->error_count > BAD_I2C_POLLS+6 ) module->error_count = BAD_I2C_POLLS+6;    //Limit counter    
+  }   
 
   if(myConfig.mqtt_enabled == true) updatemqtt(module);   //Publish to MQTT
 }
@@ -233,7 +218,6 @@ void timerCallback(void *pArg) {
 
     if (newCellI2CAddress > 0) {
       mqttprint("Found "+ String(newCellI2CAddress));
-      //Serial.println(newCellI2CAddress);
 
       cell_module m2;
       m2.address = newCellI2CAddress;
@@ -327,7 +311,7 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < length; i++) {
       buff += (char)payload[i];
   }
-  mqttprint("Message arrived [" + String(topic) + "] " + buff);
+  mqttprint("Message " + buff);
 #endif
   StaticJsonBuffer<200> jsonBuffer;     //Decode JSON
   JsonObject& root = jsonBuffer.parseObject(payload);
@@ -430,36 +414,6 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
     
   }
 }
-
-//Send bus voltage/current to MQTT
-void updatebus() {
-  DynamicJsonBuffer jsonBuffer(192);
-  JsonObject& root = jsonBuffer.createObject();
-  float bus_voltage = ina_correction * INA.getBusMilliVolts()/1000.0;
-  float bus_amps = (float)INA.getBusMicroAmps()/1000000.0;
-  float bus_watts = fabs(bus_amps)*bus_voltage;
-
-#ifdef DEBUG
-  String bus_readings="Bus "+String(bus_voltage)+" V  ";
-  bus_readings += String(bus_amps)+" A  ";
-  bus_readings += String(bus_watts) + " W";
-  mqttprint(bus_readings);
-#endif
-  root["busvolts"] = String(bus_voltage);
-  root["busamps"] = String(bus_amps);
-  root["buswatts"] = String(bus_watts);
-  root["charging"] = String(charging);  
-  root["discharging"] = String(discharging);    //Update charger status
-  char jsonout[128];
-  root.printTo(jsonout);
-  mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
-  return;
-}
-
-
-
-
-
 
 
 float tempconvert(float rawtemp) {
@@ -653,7 +607,6 @@ void loop() {
       for ( int a = 0; a < cell_array_max; a++) {
         debug_message += String(cell_array[a].address) + F(":") + String(cell_array[a].voltage) + F(":");;
         debug_message += String(cell_array[a].temperature) + F(":") + String(cell_array[a].bypass_status) + F(":");
-        debug_message += String(cell_array[a].error_count) + F(" ");
       }
       mqttprint(debug_message);
 

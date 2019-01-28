@@ -13,6 +13,7 @@ void mqttprint ( String );
 void report_configuration();
 void mqttreconnect();
 void updatemqtt( struct   cell_module *module);
+void updatebus();
 
 
 

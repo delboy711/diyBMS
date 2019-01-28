@@ -5,12 +5,15 @@
 #include <PubSubClient.h>
 #include <WiFiClient.h>
 #include <ArduinoJson.h>
+#include <INA.h>
 
 
 extern PubSubClient mqttclient;
+extern INA_Class INA;
+extern bool charging;
+extern bool discharging;
 
-
-
+const float ina_correction = 2.13;   //Correction factor for voltage divider
 
 // Print debug message to MQTT console
 void mqttprint ( String message ) {
@@ -54,13 +57,34 @@ void updatemqtt( struct  cell_module *module ) {
     root["temp"] = String(module->temperature);
   } 
   root["bypass"] = String(module->bypass_status);
-  root["errors"] = String(module->error_count);
-  root["comms_alarm"] = String(module->lost_communication);
   char jsonout[256];
   root.printTo(jsonout);
   mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
   return;
 }
 
+//Send bus voltage/current to MQTT
+void updatebus() {
+  DynamicJsonBuffer jsonBuffer(192);
+  JsonObject& root = jsonBuffer.createObject();
+  float bus_voltage = ina_correction * INA.getBusMilliVolts()/1000.0;
+  float bus_amps = (float)INA.getBusMicroAmps()/1000000.0;
+  float bus_watts = fabs(bus_amps)*bus_voltage;
 
+#ifdef DEBUG
+  String bus_readings="Bus "+String(bus_voltage)+" V  ";
+  bus_readings += String(bus_amps)+" A  ";
+  bus_readings += String(bus_watts) + " W";
+  mqttprint(bus_readings);
+#endif
+  root["busvolts"] = String(bus_voltage);
+  root["busamps"] = String(bus_amps);
+  root["buswatts"] = String(bus_watts);
+  root["charging"] = String(charging);  
+  root["discharging"] = String(discharging);    //Update charger status
+  char jsonout[128];
+  root.printTo(jsonout);
+  mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
+  return;
+}
 
