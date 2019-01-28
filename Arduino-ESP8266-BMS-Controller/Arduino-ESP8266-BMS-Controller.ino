@@ -1,4 +1,5 @@
 
+
 /* ____  ____  _  _  ____  __  __  ___
   (  _ \(_  _)( \/ )(  _ \(  \/  )/ __)
    )(_) )_)(_  \  /  ) _ < )    ( \__ \
@@ -37,17 +38,20 @@ extern "C"
 #include "i2c_cmds.h"
 #include "settings.h"
 #include "SoftAP.h"
+#include "mqtt.h"
 #include "WebServiceSubmit.h"
+#include "bst900.h"
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include <INA.h>      //INA current sense
 
 
 #define DEBUG 1
 
-//Allow up to 24 modules
-cell_module cell_array[24];
+//Allow up to 20 modules
+cell_module cell_array[20];
 int cell_array_index = -1;
 int cell_array_max = 0;
 unsigned long next_submit;
@@ -58,6 +62,13 @@ extern bool manual_balance;
 bool max_enabled = false;
 int balance_status = 0;
 // 0=No balancing 1=Manual balancing started 2=Auto Balancing enabled 3=Auto Balancing enabled and bypass happening 4=A module is over max voltage
+
+bool charging= false;
+bool discharging= false;
+uint8_t chargecurrent = 0;    //Charge current in Digipot wiper steps for analogue control of boost converter.
+uint16_t bstcurrent = 0;      //Charge current in mA for serial control of BST900 boost converter if fitted
+uint8_t dischargepower = 0;
+uint8_t nodered_timeout = 0;   //Turn off charger if this expires
 
 //Configuration for thermistor conversion
 //use the datasheet to get this data.
@@ -86,10 +97,18 @@ float Rp=0.0;      // value of R3 and Rntc in parallel at current temp
 float TempK=0.0;   // variable output
 float TempC=0.0;   // variable output
 
+String bstbuf = ""; //Input buffer for serial
+bool inputready = false;
+
 
 EmonCMS emoncms;
 
 os_timer_t myTimer;
+
+INA_Class INA;  
+//INA226 INA;
+uint8_t devicesFound = 0;
+const float ina_correction = 2.13;   //Correction factor for voltage divider
 
 void avg_balance() {
   uint16_t avgint = 0;
@@ -110,8 +129,6 @@ void avg_balance() {
 
     balance_status = 2;
     
-    //Serial.println("Average cell voltage is currently : " + String(avg*1000));
-    //Serial.println("Configured balance voltage : " + String(myConfig.balance_voltage*1000));
 
     if ( avg >= myConfig.balance_voltage )  {
       for ( int a = 0; a < cell_array_max; a++) {
@@ -305,13 +322,13 @@ void scani2cBus() {
 
 // MQTT functions
 void mqttcallback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
+#ifdef DEBUG
+  String buff="";
   for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+      buff += (char)payload[i];
   }
-  Serial.println();
+  mqttprint("Message arrived [" + String(topic) + "] " + buff);
+#endif
   StaticJsonBuffer<200> jsonBuffer;     //Decode JSON
   JsonObject& root = jsonBuffer.parseObject(payload);
   // Test if parsing succeeds.
@@ -320,22 +337,25 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
     return;
   }
 // TODO - Do stuff
+  uint16_t Avg;
   uint8_t address;
+  
   float value;
   if ( root.containsKey("address") ) address = root["address"];
   if ( root.containsKey("value") ) value = root["value"];
   uint8_t command = root["command"];
   switch(command) {
     case 1:                                     // Command 1 - resetESP
-      Serial.println("Restarting Controller");
+      mqttprint("Restarting Controller");
       delay(1000);
       ESP.restart();
       break;
     case 2:                                     // Command 2 - Start Avg balance
-      Serial.println("Starting balancing");
-      AboveAverageBalance();
+      Avg = AboveAverageBalance();
+      mqttprint("Started balancing to  " + String(Avg) + " mV");
       break;
     case 3:                                     // Command 3 - Cancel Avg balance
+      mqttprint("Stop balancing");
       CancelAverageBalance();
       break;
     case 4:                                     // Command 4 - Set Voltage Calibration
@@ -357,21 +377,85 @@ void mqttcallback(char* topic, byte* payload, unsigned int length) {
     case 7:                                     // Command 7 - Provision
       runProvisioning = true;
       break;
-    case 8:
-      break;
-    case 9:
-      break;
+    case 8:                                 //Command 8 - Report configuration
+    report_configuration();
+    break;
     case 10:                                            //Close Charger Relay on D5
-      digitalWrite(D5, HIGH);
+      digitalWrite(D5, HIGH);               //Turn on charger
+      charging= true;
+      discharging= false;
+      nodered_timeout = 20;        // if no new command received in 10 mins turn off charger
+      if( root.containsKey("chargecurrent") == true ) {
+        chargecurrent = root["chargecurrent"];
+        set_charge_current(chargecurrent);      // Set charger digipot
+      }
+      if( root.containsKey("bstcurrent") == true ) {
+        bstcurrent = root["bstcurrent"];
+        setcurrent_bst900(bstcurrent);      // Set boost converter current
+      }      
+      set_inverter_power(0);                //Disable inverter if active
+      digitalWrite(D7, LOW);                  // Disable discharging relay
       break;
-    case 11:                                            //Open Charger Relay on D5
-      digitalWrite(D5, LOW);
+    case 14:                     //Immediate shutdown - Turns off charging and discharging without delay
+      digitalWrite(D7, LOW);                  // Disable discharging relay
+      digitalWrite(D5, LOW);                  // Disable charging relay
+      nodered_timeout = 0;
+    case 11: 
+    case 13:    //Cancel Charging or Discharging
+      charging= false;
+      discharging= false;
+      if (nodered_timeout > 10)  nodered_timeout = 10; //Reduce timeout on expiry relay releases
+      chargecurrent = 0;
+      dischargepower = 0;
+      set_charge_current(0);    //Turn off digipots
+      set_inverter_power(0);
       break;
+    case 12:                                            //Enable Inverter
+      charging= false;
+      discharging= true;
+      digitalWrite(D5, LOW);       // Cancel charging if present
+      set_charge_current(0);
+      nodered_timeout = 20;        // if no new command received in 10 mins turn off inverter
+      if( root.containsKey("dischargepower") == true ) dischargepower = root["dischargepower"];
+      set_inverter_power(dischargepower);      // Set inverter digipot
+      if (dischargepower > 0 ) digitalWrite(D7, HIGH);       // Enable discharging relay
+      break;
+    case 18:                      //Pass text to serial interface to control boost converter
+      if( root.containsKey("serial") == true ) {
+        String text = root["serial"];
+        bst_send_text(text);
+      }
     default:
       break;
     
   }
 }
+
+//Send bus voltage/current to MQTT
+void updatebus() {
+  DynamicJsonBuffer jsonBuffer(192);
+  JsonObject& root = jsonBuffer.createObject();
+  float bus_voltage = ina_correction * INA.getBusMilliVolts()/1000.0;
+  float bus_amps = (float)INA.getBusMicroAmps()/1000000.0;
+  float bus_watts = fabs(bus_amps)*bus_voltage;
+
+#ifdef DEBUG
+  String bus_readings="Bus "+String(bus_voltage)+" V  ";
+  bus_readings += String(bus_amps)+" A  ";
+  bus_readings += String(bus_watts) + " W";
+  mqttprint(bus_readings);
+#endif
+  root["busvolts"] = String(bus_voltage);
+  root["busamps"] = String(bus_amps);
+  root["buswatts"] = String(bus_watts);
+  root["charging"] = String(charging);  
+  root["discharging"] = String(discharging);    //Update charger status
+  char jsonout[128];
+  root.printTo(jsonout);
+  mqttclient.publish(MQTT_TOPIC, jsonout, root.measureLength());   //Publish to MQTT
+  return;
+}
+
 
 void updatemqtt( struct  cell_module *module ) {
   DynamicJsonBuffer jsonBuffer(400);                              //Allocate buffer for JSON
@@ -398,8 +482,9 @@ void mqttprint ( String message ) {
 }
 
 void mqttreconnect() {
+  //int count=8;    //How many attempts shall we make?
   // Loop until we're reconnected
-  while (!mqttclient.connected()) {
+  //while (!mqttclient.connected() && count ) {
     Serial.print("Attempting MQTT connection...");
     // Create a random client ID
     String clientId = "diyBMS-";
@@ -409,12 +494,8 @@ void mqttreconnect() {
       Serial.println("connected");
       mqttclient.subscribe(MQTT_COMMAND_TOPIC);
     } else {
-      Serial.print("failed, rc=");
-      Serial.print(mqttclient.state());
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
+      //Serial.print("failed, rc=");
+      //Serial.println(mqttclient.state());
   }
 }
 
@@ -424,33 +505,22 @@ float tempconvert(float rawtemp) {
   Rntc=1/((1/Rp)-(1/R3));     //calc Thermistor resistance
   TempK=(beta/log(Rntc/Rinf)); // calc temperature in Kelvin
   TempC=TempK-273.15;
-  /*
-  Serial.print("rawtemp = ");
-  Serial.print(rawtemp);
-  Serial.print("   Vout = ");
-  Serial.print(Vout);
-  Serial.print("   Rp = ");
-  Serial.print(Rp);
-  Serial.print("   Rntc = ");
-  Serial.println(Rntc);
-*/
   return TempC;
 }
 
 void setup() {
   Serial.begin(19200);           // start serial for output
   Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-  Serial.println();
-
+  bstbuf.reserve(64);
   //D4 is LED
   pinMode(D4, OUTPUT);
   LED_OFF;
   //D5 is Charger Relay output
   pinMode(D5, OUTPUT);
   digitalWrite(D5, LOW);
+  //D7 is Inverter Relay output
+  pinMode(D7, OUTPUT);
+  digitalWrite(D7, LOW); 
   //D0 is Smoke Detector input
   pinMode(D0, INPUT);
   
@@ -481,17 +551,24 @@ void setup() {
     setupAccessPoint();
   }
 
-//Before scanning i2c bus wait for 10 seconds to allow
-//modules to enter panic mode
-//this avoids lock ups
-  Serial.println("Delay to allow modules to enter panic mode");
-  delay(10000);
+//Before scanning i2c bus wait for 3 seconds 
+  delay(3000);
+#ifdef DEBUG
+  mqttprint("Scanning I2c bus");
+#endif
   scani2cBus();
 
   //Ensure we service the cell modules every 0.5 seconds
   os_timer_setfn(&myTimer, timerCallback, NULL);
   os_timer_arm(&myTimer, 1000, true);
 
+  set_charge_current(0);    //Turn off charger digipot
+  set_inverter_power(0);  //Turn off inverter digipot
+
+  //Enable Digipots (removes Shutdown setting)
+  enable_digipot();
+
+  
   //Check WIFI is working and connected
   Serial.print(F("WIFI Connecting"));
 
@@ -510,8 +587,32 @@ void setup() {
   if(myConfig.mqtt_enabled == true) {
     mqttclient.setServer(mqttServerName, 1883);
     mqttclient.setCallback(mqttcallback);
+    mqttreconnect();
   }
+  
+  mqttprint ("Configured Maximum voltage : " + String(myConfig.max_voltage)); // Report max pack voltage
 
+  
+  //Setup INA current sensor
+  mqttprint(" - Searching & Initializing INA devices");
+  devicesFound = INA.begin(20,SHUNT);                                         // Set expected 20 Amp max and resistor 1.5 mohm   //
+  mqttprint(" - Detected "+String(devicesFound)+" INA devices on the I2C bus");
+  INA.setBusConversion(10000);                                                 // Maximum conversion time 8.244ms  //
+  INA.setShuntConversion(10000);                                               // Maximum conversion time 8.244ms  //
+  INA.setAveraging(1024);                                                   // Average each reading n-times     //
+  INA.setMode(INA_MODE_CONTINUOUS_BOTH);                                      // Bus/shunt measured continuously
+  String bus_readings= "";
+  for (uint8_t i=0;i<devicesFound;i++) // Loop through all devices
+  {
+    bus_readings = String(i)+ "  ";
+    bus_readings += String(INA.getDeviceName(i)) + "  ";
+    bus_readings += String((float)INA.getBusMilliVolts(i)/1000.0) + " V  ";    // convert mV to Volts
+    bus_readings += String((float)INA.getBusMicroAmps(i)/1000.0) + " mA  ";     // convert uA to Milliamps
+    bus_readings += String((float)INA.getBusMicroWatts(i) / 1000.0) + " mW  "; // convert uA to Milliwatts
+    mqttprint(bus_readings);
+} // for-next each INA device loop
+
+  
   //Setup OTA Updates
   ArduinoOTA.setHostname("diyBMS");
     ArduinoOTA.onStart([]() {
@@ -546,10 +647,6 @@ void setup() {
 
 void loop() {
   ArduinoOTA.handle();
-  // Ensure we are connected to MQTT
-  if (myConfig.mqtt_enabled == true && !mqttclient.connected()) {
-    mqttreconnect();
-  }
   for ( int j=0; j<=3; j++) {
     HandleWifiClient();
     if(myConfig.mqtt_enabled == true) mqttclient.loop();
@@ -559,31 +656,48 @@ void loop() {
 
 
    if (cell_array_max > 0) {
-        //Debug messages to MQTT
-#ifdef DEBUG
-        String debug_message="";
-        //Publish to MQTT
-        for ( int a = 0; a < cell_array_max; a++) {
-          debug_message += String(cell_array[a].address) + F(":") + String(cell_array[a].voltage) + F(":");;
-          debug_message += String(cell_array[a].temperature) + F(":") + String(cell_array[a].bypass_status) + F(":");
-          debug_message += String(cell_array[a].error_count) + F(" ");
-        }
-        //mqttclient.beginPublish("diybmsdebug",debug_message.length(), false);    //New function in PubSubClient to publish long messages
-        mqttprint(debug_message);
-        //mqttclient.endPublish();
-        
-#endif
     
     if ((millis() > next_submit) && (WiFi.status() == WL_CONNECTED)) {
+      // Ensure we are connected to MQTT
+      if (myConfig.mqtt_enabled == true && !mqttclient.connected()) {
+      mqttreconnect();
+      }
       //Update emoncms every 30 seconds
       emoncms.postData(myConfig, cell_array, cell_array_max);
+
+      //Check nodered timeout and turn off (dis)charging if it has expired
+      if ( nodered_timeout > 0 ) {
+        nodered_timeout -= 1;
+        if ( nodered_timeout == 0 ) {
+          digitalWrite(D5, LOW);  //Release charger relay
+          digitalWrite(D7, LOW);  //Release inverter relay
+          charging= false;
+          discharging= false;
+          nodered_timeout = 0;
+          chargecurrent = 0;        //Turn off charger digipot
+          dischargepower = 0;     //Turn off inverter digipot
+        }
+      }
+      set_charge_current(chargecurrent);            // Refresh charger digipot just in case
+      set_inverter_power(dischargepower);      // Refresh inverter digipot just in case
+      
+      //Read bus battery voltage and current
+      updatebus();
+      
 #ifdef DEBUG
-      mqttprint ("Configured Maximum voltage : " + String(myConfig.max_voltage));
-      //Serial.println("Configured Maximum voltage : " + String(myConfig.max_voltage));
+        //Debug messages to MQTT
+      String debug_message="";
+      for ( int a = 0; a < cell_array_max; a++) {
+        debug_message += String(cell_array[a].address) + F(":") + String(cell_array[a].voltage) + F(":");;
+        debug_message += String(cell_array[a].temperature) + F(":") + String(cell_array[a].bypass_status) + F(":");
+        debug_message += String(cell_array[a].error_count) + F(" ");
+      }
+      mqttprint(debug_message);
+
 #endif
       
       for (int a = 0; a < cell_array_max; a++) {
-        if (cell_array[a].voltage >= myConfig.max_voltage*1000) {
+        if (cell_array[a].voltage >= myConfig.max_voltage*1000 && cell_array[a].voltage != 65535) {
           cell_array[a].balance_target = myConfig.max_voltage*1000; 
            max_enabled = true;
            balance_status = 4;
@@ -597,11 +711,18 @@ void loop() {
       next_submit = millis() + 30000;
     }
   }
-
-  if(digitalRead(D0) == true ) {    //Smoke detected, shutdown and sound alarms
-    digitalWrite(D5, LOW);          //Shutdown charger
-                                    //Shutdown inverter
-    mqttclient.publish(MQTT_TOPIC, "{smoke_alarm:1}");    //Send alarm to MQTT
+ 
+  if (Serial.available()) bst_process();    //Data has arrived on serial interface from boost converter
+  if (inputready ) {
+    inputready=false;
+    mqttprint ("text:"+ bstbuf);
+    bstbuf = "";
   }
+
+  //if(digitalRead(D0) == true ) {    //Smoke detected, shutdown and sound alarms
+  //  digitalWrite(D5, LOW);          //Shutdown charger
+                                    //Shutdown inverter
+  //  mqttclient.publish(MQTT_TOPIC, "{smoke_alarm:1}");    //Send alarm to MQTT
+  //}
 }//end of loop
 
