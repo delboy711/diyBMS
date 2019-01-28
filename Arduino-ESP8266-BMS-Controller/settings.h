@@ -21,6 +21,9 @@
 // MQTT topic to  listen for commands from
 #define MQTT_COMMAND_TOPIC "diybms_command"
 
+//Define shunt resistance in micro ohms
+#define SHUNT 1500
+
 //URL of location to download  browser files
 //#define FILES_URL "https://delboy711.github.io/diyBMS/"
 #define FILES_URL "http://192.168.1.4/emoncms/"

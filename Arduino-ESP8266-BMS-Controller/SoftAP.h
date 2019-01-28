@@ -15,7 +15,7 @@ bool SetTempCalib(uint8_t module, float newValue);
 
 extern int cell_array_index;
 extern int cell_array_max;
-extern cell_module cell_array[24];
+extern cell_module cell_array[20];
 
 extern bool runProvisioning;
 

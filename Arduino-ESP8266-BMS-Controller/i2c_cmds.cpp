@@ -2,15 +2,62 @@
 #include "bms_values.h"
 #include "i2c_cmds.h"
 #include "Arduino.h"
+#include "AD524X.h"   // Digital potentiometer https://github.com/RobTillaart/Arduino/tree/master/libraries/AD524X
+
 
 //Default i2c SLAVE address (used for auto provision of address)
 uint8_t DEFAULT_SLAVE_ADDR = 21;
 
-//Configured cell modules use i2c addresses 24 to 48 (24S)
+//Configured cell modules use i2c addresses 24 to 44 (20S)
 //See http://www.i2c-bus.org/addressing/
 uint8_t DEFAULT_SLAVE_ADDR_START_RANGE = 24;
-uint8_t DEFAULT_SLAVE_ADDR_END_RANGE = DEFAULT_SLAVE_ADDR_START_RANGE + 24;
+uint8_t DEFAULT_SLAVE_ADDR_END_RANGE = DEFAULT_SLAVE_ADDR_START_RANGE + 20;
 
+uint8_t DIGIPOT_ADDRESS = 0x2f;
+
+// Lookup table to map charging current in tenths of an Amp to digipot setting
+// Calibrate to match your system
+const uint8_t chargerlookup[] = { 5,10,15,20,25,30,35,40,45,50,55,60,65,70,75};
+// Lookup table to map inverter power in Watts to digipot setting
+// Calibrate to match your system
+const uint16_t inverterlookup[] = { 30,60,90,120,150,180,210,240,270,300,330,350,380,410,440,470};
+
+
+AD524X Digipot(DIGIPOT_ADDRESS);
+
+//Enable Digipot
+bool enable_digipot() {
+  Digipot.setO1(1);   //Removes low on SHDN pin
+  Digipot.getO1();
+}
+
+//Set digipot value
+uint8_t set_digipot(uint8_t pot, uint8_t value) {
+  Digipot.write(pot, value, 1, 1);
+  return Digipot.readBackRegister();
+}
+
+uint8_t read_digipot() {
+  Digipot.readBackRegister();
+}
+
+uint8_t set_charge_current(uint8_t value) {
+  //uint8_t setting;
+  //for ( setting = 0; setting < sizeof(chargerlookup); setting++) { //Use lookup table to match current to digipot setting
+  //  if ( value > chargerlookup[setting] ) break;
+  //}
+  //return set_digipot(0,setting);
+  set_digipot(0,value);
+}
+
+uint8_t set_inverter_power(uint8_t value) {
+  //uint8_t setting;
+  //for ( setting = 0; setting < sizeof(inverterlookup)/2; setting++) { //Use lookup table to match power to digipot setting
+  //  if ( value > inverterlookup[setting] ) break;
+  //}
+  //return set_digipot(1,setting);
+  set_digipot(1,value);
+}
 
 union {
   float val;
@@ -162,7 +209,7 @@ void initWire() {
 
   // join i2c bus
   // DATA=GPIO4/D2, CLOCK=GPIO5/D1
-  Wire.begin(4, 5); //SDA/SCL
+  Wire.begin(4, 5); //SDA/SCL 
 }
 
 bool testModuleExists(uint8_t address) {
@@ -192,4 +239,6 @@ uint8_t provision() {
 
   return 0;
 }
+
+
 
