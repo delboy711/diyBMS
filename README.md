@@ -1,4 +1,49 @@
 # diyBMS
+This is my fork of Stuart Pittaway's excellent diyBMS..
+
+Principle differences between this fork and the main line are :-
+
+* Addition of controller pcb containing
+  * ESP8266 processor ( Wemos D1 mini) 
+  * Power supply derived from battery voltage
+  * Current, power and voltage measurement based on INA226  
+  * Relay control to switch charger and inverter on/off
+  * Smoke alarm input.
+* Addition of inverter controller pcb containing
+	* ESP8266 processor
+	* Filter circuit to turn PWM signal to a DC control
+* Controller reports status via MQTT to NodeRed, EmonCMS etc.
+* Both controllers receive commands from NodeRed via MQTT to set charging current, inverter power output, and inverter/charger relays.
+* Several of Colin Hickey's enhancements.
+
+## Architecture
+I have a pre existing 4kW solar installation for which I receive a Feed In Tariff (FIT) for producing solar power. I get paid the same regardless of whether the energy is exported to the grid, or I use it myself.
+ So the most cost effective course of action is to store excess solar energy in a battery using an AC coupled power supply, and then to feed the energy back in the evening using a grid tied inverter powered by the battery.
+This will be beneficial to the grid as a whole since it will reduce demand during the peak evening 'spike'.
+
+### Charging
+My Powerwall layout consists of a 9S 44P battery with a nominal voltage of 33V.  The battery is charged from the mains using a 24V 600W power supply via a
+900W rated  boost converter model BST900 manufactured by Ming He and easily available on eBay. The boost converter operates as a constant current/ constant voltage source. The output voltage and maximum current
+ are both set using push buttons on the BST900. Alternate firmware is available for the BST900 to control it via a serial interface.  [See BST900 alternate firmware](https://github.com/delboy711/BST900).
+ In my system Node Red is used in conjunction with [OpenEnergyMonitor](https://openenergymonitor.org/) to measure solar power production as well as electrical load to calculate how much excess solar energy is available
+  to feed into the storage battery. NodeRed communicates the figure via MQTT protocol to the diyBMS controller which then controls the BST900 boost converter over the serial interface.
+  
+A solid state relay connected to the AC input of the 24V PSU allows the diyBMS controller to shut down the PSU when it is not required, or in the event of an error.
+
+### Discharging
+I am using a SUN-1000GTIL2-LCD grid tied inverter which produces up to 1000W of AC power. This inverter has a socket to attach a current sense transformer to modulate its output power.
+When the current sense transformer is attached to the grid inlet, the inverter will  modulate its power to minimise power imported from the grid.
+ In my situation this is not convenient because the grid inlet  is too far away. Instead I have taken advantage of a hidden feature of the inverter to modulate the power using a digital potentiometer.
+  On opening the inverter it will be seen that there is an unused white plastic 2 pin header.If the plug leading to the socket for the external current sense transformer is moved to this header, then by applying a suitable voltage between the pins of the socket,
+ the inverter output can be modulated. Initially I tried using a digital potentiometer managed by the ESP8266 controller to set the inverter power output, but this was unsatisfactory because the inverters Ground was floating relative to chassis ground, and there was a potential difference to the
+ ground reference of the charger circuit. So instead I use a separate ESP8266 processor to produce a PWM output voltage to the inverter. This ESP8266 is wifi connected to Node-Red and sets the inverter power as requested.
+ A small modification is required to the inverter to break out 3.3V power supply for the ESP8266 processor
+
+
+
+Stuart Pittaway's original README follows:-
+
+# diyBMS
 Do it yourself battery management system to Lithium ion battery packs/cells
 
 More discussion

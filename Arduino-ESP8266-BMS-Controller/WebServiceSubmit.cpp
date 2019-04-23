@@ -34,7 +34,7 @@ void EmonCMS::postData(eeprom_settings myConfig, cell_module (&cell_array)[20], 
   WiFiClient client;
 
   if (!client.connect(myConfig.emoncms_host, myConfig.emoncms_httpPort)) {
-    Serial.println("connection failed");
+    //Serial.println("connection failed");
 
   } else {
     // This will send the request to the server
@@ -47,7 +47,7 @@ void EmonCMS::postData(eeprom_settings myConfig, cell_module (&cell_array)[20], 
       yield();
 
       if (millis() > timeout) {
-        Serial.println(">>> Client Timeout !");
+        //Serial.println(">>> Client Timeout !");
         client.stop();
         return;
       }
@@ -55,7 +55,7 @@ void EmonCMS::postData(eeprom_settings myConfig, cell_module (&cell_array)[20], 
       if (client.available())
       {
         String line = client.readStringUntil('\n');
-        Serial.println(line);
+        //Serial.println(line);
       }
     }
     client.stop();

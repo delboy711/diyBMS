@@ -80,7 +80,7 @@ void CancelAverageBalance() {
   manual_balance = false;
   balance_status = 0;
   
-  Serial.println("Cancelling balancing");  
+  //Serial.println("Cancelling balancing");  
 }
 void handleCancelAverageBalance() {
   CancelAverageBalance();
@@ -122,8 +122,8 @@ void handleFactoryReset() {
 
   for ( int a = 0; a < cell_array_max; a++) {
     if (cell_array[a].address == module) {
-      Serial.print("FactoryReset ");
-      Serial.print(module);
+      //Serial.print("FactoryReset ");
+      //Serial.print(module);
       cell_array[a].factoryReset = true;
       cell_array[a].update_calibration = true;
       server.send(200, "text/plain", "");
@@ -137,10 +137,10 @@ void handleSetLoadResistance() {
   uint8_t module =  server.arg("module").toInt();
   float newValue = server.arg("value").toFloat();
 
-  Serial.print("SetLoadResistance ");
-  Serial.print(module);
-  Serial.print(" = ");
-  Serial.println(newValue, 6);
+  //Serial.print("SetLoadResistance ");
+  //Serial.print(module);
+  //Serial.print(" = ");
+  //Serial.println(newValue, 6);
 
   for ( int a = 0; a < cell_array_max; a++) {
     if (cell_array[a].address == module) {
@@ -196,10 +196,10 @@ void handleSetEmonCMS() {
 }
 
 bool SetVoltCalib(uint8_t module, float newValue) {
-  Serial.print("SetVoltCalib ");
-  Serial.print(module);
-  Serial.print(" = ");
-  Serial.println(newValue, 6);
+  //Serial.print("SetVoltCalib ");
+  //Serial.print(module);
+  //Serial.print(" = ");
+  //Serial.println(newValue, 6);
 
   for ( int a = 0; a < cell_array_max; a++) {
     if (cell_array[a].address == module) {
@@ -222,10 +222,10 @@ void handleSetVoltCalib() {
 
 bool SetTempCalib(uint8_t module, float newValue) {
     
-  Serial.print("SetTempCalib ");
-  Serial.print(module);
-  Serial.print(" = ");
-  Serial.println(newValue, 6);
+  //Serial.print("SetTempCalib ");
+  //Serial.print(module);
+  //Serial.print(" = ");
+  //Serial.println(newValue, 6);
   for ( int a = 0; a < cell_array_max; a++) {
     if (cell_array[a].address == module) {
       if (cell_array[a].temperature_calib != newValue) {
@@ -416,7 +416,7 @@ void setupAccessPoint(void) {
   WiFi.softAP(ssid);
 
   if (!MDNS.begin("diybms")) {
-    Serial.println("Error setting up MDNS responder!");
+    //Serial.println("Error setting up MDNS responder!");
     //This will force a reboot of the ESP module by hanging the loop
     while (1) {
       delay(1000);
@@ -430,7 +430,7 @@ void setupAccessPoint(void) {
   server.begin();
   MDNS.addService("http", "tcp", 80);
 
-  Serial.println("Soft AP ready on 192.168.4.1");
+  //Serial.println("Soft AP ready on 192.168.4.1");
   // Restart after 10 minutes in case a power cut brought us here
   long m = millis();  
   while (millis()< m+(AP_TIMEOUT * 1000)) {
@@ -462,7 +462,7 @@ void SetupManagementRedirect() {
   server.begin();
   MDNS.addService("http", "tcp", 80);
 
-  Serial.println("Management Redirect Ready");
+  //Serial.println("Management Redirect Ready");
 }
 
 void HandleWifiClient() {

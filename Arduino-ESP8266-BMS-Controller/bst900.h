@@ -13,9 +13,10 @@
 
 void bst_process();
 boolean bst900_init();
-boolean setcurrent_bst900 (uint16_t chargecurrent);
+boolean setcurrent_bst900 (String chargecurrent);
 void bst_send_text(String);
 void serialFlush();
+void stop_bst900();
 
 
 #endif

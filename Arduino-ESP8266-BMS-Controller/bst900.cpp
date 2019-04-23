@@ -14,6 +14,8 @@ extern String bstbuf;
 extern bool inputready;
 //extern void mqttprint(String);
 
+bool bst_output_enabled = false;
+
 // Empty input buffer
 void serialFlush(){
   while(Serial.available() > 0) {
@@ -29,10 +31,14 @@ void bst_process() {
     char character = Serial.read();
     if(character == '\r') continue;
     if(character == '\n') {
-      inputready = true;
-      return;
+      if ( bstbuf.endsWith("OK") || bstbuf.endsWith("E!") ) {
+        inputready = true;
+        return;
+      }
+      character = ' ';    //Replace LF with spaces
     }
     bstbuf += character;
+    yield();
   } 
 }
 
@@ -43,17 +49,41 @@ boolean bst900_init() {
   Serial.write('\n');
 }
 
+/* could be issues if bst fails to respond to a command
+ *  suggest putting sequence number on each message to assist with ensuring response.
+ *  Or else reflect command back with OK.
+ */
+
+//Disable boost converter output
+void stop_bst900() {
+  //if (bst_output_enabled == true) Serial.print("OUTPUT 0\n");
+  Serial.print("OUTPUT 0\n");
+  delay(20);    
+  bst_output_enabled = false;
+}
 
 
-//Set charger current in mA
-boolean setcurrent_bst900 (uint16_t chargecurrent) {
-  Serial.print("CURRENT " + String(chargecurrent) + "\n");
+//Set charger current in A
+boolean setcurrent_bst900 (String chargecurrent) {
+  if ( chargecurrent == "0" ) {
+    stop_bst900();
+    return true;
+  }
+  Serial.print("CURRENT " + chargecurrent + '\n');
+  delay(20);
+  //if (bst_output_enabled == false) Serial.print("OUTPUT 1\n");
+  Serial.print("OUTPUT 1\n");
+  bst_output_enabled = true; 
 }
 
 //Send text string to BST900
 void bst_send_text(String text) {
   Serial.println(text);
+  delay(5);
 
 }
+
+
+
 
 

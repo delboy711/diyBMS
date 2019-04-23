@@ -8,6 +8,8 @@
 #include <INA.h>
 
 
+#define DEBUG
+
 extern PubSubClient mqttclient;
 extern INA_Class INA;
 extern bool charging;
@@ -33,13 +35,13 @@ void mqttreconnect() {
   //int count=8;    //How many attempts shall we make?
   // Loop until we're reconnected
   //while (!mqttclient.connected() && count ) {
-    Serial.print("Attempting MQTT connection...");
+    //Serial.print("Attempting MQTT connection...");
     // Create a random client ID
     String clientId = "diyBMS-";
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
     if (mqttclient.connect(clientId.c_str())) {
-      Serial.println("connected");
+      //Serial.println("connected");
       mqttclient.subscribe(MQTT_COMMAND_TOPIC);
     } else {
       //Serial.print("failed, rc=");
@@ -69,7 +71,7 @@ void updatebus() {
   JsonObject& root = jsonBuffer.createObject();
   float bus_voltage = ina_correction * INA.getBusMilliVolts()/1000.0;
   float bus_amps = (float)INA.getBusMicroAmps()/1000000.0;
-  float bus_watts = fabs(bus_amps)*bus_voltage;
+  float bus_watts = bus_amps*bus_voltage;
 
 #ifdef DEBUG
   String bus_readings="Bus "+String(bus_voltage)+" V  ";
